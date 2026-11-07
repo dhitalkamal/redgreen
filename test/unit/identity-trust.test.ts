@@ -22,6 +22,13 @@ describe('verifyIdentity', () => {
     expect(await verifyIdentity(run, results, PATH, pulls(undefined))).toMatch(/not found/);
     expect(await verifyIdentity(run, results, PATH, pulls({ ...good, headRepo: 'other/repo' }))).toMatch(/does not match/);
   });
+
+  // a deleted fork leaves head.repo null on both sides; '' === '' must not count as a match
+  it('fails closed when the head repository is unknown', async () => {
+    const gone = { ...good, headRepo: '' };
+    expect(await verifyIdentity({ ...run, headRepo: '' }, results, PATH, pulls(gone))).toMatch(/head repository/);
+    expect(await verifyIdentity(run, results, PATH, pulls(gone))).toMatch(/head repository/);
+  });
 });
 
 describe('trust', () => {

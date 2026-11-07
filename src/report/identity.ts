@@ -14,6 +14,8 @@ export async function verifyIdentity(
   if (results.headSha !== run.headSha) return 'results are for a different commit than the run';
   const pull = await findPull(results.pr);
   if (!pull) return `pull request #${results.pr} was not found`;
+  // a deleted fork shows up as an empty repo name on both sides, which would compare equal
+  if (!run.headRepo || !pull.headRepo) return `cannot verify the head repository of pull request #${results.pr}`;
   if (pull.headSha !== run.headSha || pull.headRepo !== run.headRepo) {
     return `pull request #${results.pr} does not match the run`;
   }

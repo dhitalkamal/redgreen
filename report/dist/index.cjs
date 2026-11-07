@@ -120331,7 +120331,10 @@ var DEFAULT_TRUST_PATTERNS = [
   "noxfile.py",
   "setup.cfg",
   "Makefile",
-  "justfile"
+  "GNUmakefile",
+  "makefile",
+  "justfile",
+  "conftest.py"
 ];
 function untrustedFiles(changed, patterns) {
   const isMatch = makeMatcher(patterns);

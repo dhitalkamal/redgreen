@@ -37,6 +37,12 @@ describe('trust', () => {
     expect(untrustedFiles(changed, DEFAULT_TRUST_PATTERNS)).toEqual(['.github/workflows/redgreen.yml', 'pkg/Makefile', 'vitest.config.ts']);
   });
 
+  // gnu make reads GNUmakefile and makefile before Makefile; pytest loads conftest.py hooks on its own
+  it('finds make and pytest files that can override how tests run', () => {
+    const changed = ['GNUmakefile', 'sub/makefile', 'tests/conftest.py', 'src/conftest_helper.py'];
+    expect(untrustedFiles(changed, DEFAULT_TRUST_PATTERNS)).toEqual(['GNUmakefile', 'sub/makefile', 'tests/conftest.py']);
+  });
+
   it('compares only the scripts section of package.json', () => {
     const pkg = (scripts: object, deps: object = {}) => JSON.stringify({ scripts, dependencies: deps });
     expect(scriptsChanged(pkg({ test: 'vitest' }), pkg({ test: 'vitest' }, { zod: '4' }))).toBe(false);

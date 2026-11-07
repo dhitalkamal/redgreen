@@ -20,6 +20,17 @@ describe('findMissing', () => {
     expect(missing).toEqual(['parse_emoji', 'src/lexer/emoji.rs', 'helpers.format_time']);
   });
 
+  // rust paths and generics: the definition only ever spells the last segment
+  it('looks up the last identifier of :: paths and generic calls', async () => {
+    repo = await makeRepo();
+    await repo.write('src/de.rs', 'impl Deserializer for Value {\n  fn deserialize_struct() {}\n}\nfn try_into() {}\n');
+    await repo.commit('base');
+    const missing = await findMissing(repo.dir, [
+      'Value::deserialize_struct', 'try_into::<Datetime>', 'Value::<T>::deserialize_struct', 'Value::parse_missing',
+    ]);
+    expect(missing).toEqual(['Value::parse_missing']);
+  });
+
   it('stops at five', async () => {
     repo = await makeRepo();
     await repo.write('a.txt', 'x');

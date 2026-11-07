@@ -10,6 +10,8 @@ export interface TestCase {
   name: string;
   classname: string;
   file?: string;
+  // name of the testsuite element holding the case (gotestsum: the go package path)
+  suite?: string;
   status: TestStatus;
   message?: string;
 }
@@ -40,29 +42,49 @@ function relativeTo(file: string | undefined, roots: string[]): string | undefin
   return file;
 }
 
+// jest-junit copies the full title into classname too, which would read "title::title"
 export function testId(classname: string, name: string, file?: string): string {
-  const scope = classname || file || '';
+  const scope = (classname !== name ? classname : '') || file || '';
   return scope ? `${scope}::${name}` : name;
 }
 
+// go test progress lines that gotestsum leaves around the real output
+const GO_MARKER = /^\s*(=== (RUN|PAUSE|CONT|NAME)\s|--- FAIL:)/;
+
+// the attribute is the usual summary, but some producers put the useful text in the body:
+// nextest repeats the location attribute as the first body line and the panic text follows,
+// gotestsum sets the attribute to the single word "Failed"
 function messageOf(node: unknown): string | undefined {
   if (typeof node === 'string') return str(node.trim());
-  if (node && typeof node === 'object') {
-    const n = node as Node;
-    return str(n.message) ?? str(typeof n['#text'] === 'string' ? n['#text'].trim() : undefined);
+  if (!node || typeof node !== 'object') return undefined;
+  const n = node as Node;
+  const attr = str(n.message);
+  const body = str(typeof n['#text'] === 'string' ? n['#text'].trim() : undefined);
+  if (!attr || !body) return attr ?? body;
+  if (body.startsWith(attr)) return body;
+  if (/^\w+$/.test(attr)) {
+    const kept = body.split(/\r?\n/).filter((line) => !GO_MARKER.test(line)).join('\n').trim();
+    return kept || body;
   }
-  return undefined;
+  return attr;
+}
+
+// absolute run-directory paths in stack traces are noise in a pr comment
+function stripRoots(message: string | undefined, roots: string[]): string | undefined {
+  if (!message) return message;
+  return roots.reduce((text, root) => text.replaceAll(`${root}${sep}`, ''), message);
 }
 
 function collect(suite: Node, out: TestCase[], roots: string[]): void {
+  const suiteName = str(suite.name);
   for (const tc of list(suite.testcase)) {
-    const name = String(tc.name ?? '');
-    const classname = String(tc.classname ?? '');
+    const name = String(tc.name ?? '').trim();
+    const classname = String(tc.classname ?? '').trim();
     const file = relativeTo(str(tc.file) ?? str(suite.file), roots);
     const failures = [...list(tc.failure), ...list(tc.error)];
     const status: TestStatus = failures.length > 0 ? 'fail' : list(tc.skipped).length > 0 ? 'skip' : 'pass';
-    const message = failures.length > 0 ? messageOf(failures[0]) : undefined;
-    out.push({ id: testId(classname, name, file), name, classname, file, status, message });
+    const message = failures.length > 0 ? stripRoots(messageOf(failures[0]), roots) : undefined;
+    out.push({ id: testId(classname, name, file), name, classname, file, suite: suiteName, status, message });
   }
   for (const child of list(suite.testsuite)) collect(child, out, roots);
 }

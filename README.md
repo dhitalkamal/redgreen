@@ -20,7 +20,7 @@ Add `docs/templates/redgreen.yml` and `docs/templates/redgreen-report.yml` to `.
 | Verdict | Meaning |
 |---|---|
 | Proof found | At least one test fails without the change and passes with it |
-| No proof | The pull request's tests pass even without its code changes |
+| No proof | No test fails without the pull request's code changes and passes with them |
 | No proof yet | The pull request adds or changes no tests |
 | Breaks tests | Tests that passed before fail with the change |
 | Inconclusive | No clean comparison was possible; the comment says why |
@@ -40,6 +40,17 @@ Add `docs/templates/redgreen.yml` and `docs/templates/redgreen-report.yml` to `.
 | `retries` | 0 | Extra repeats of each run to detect flaky tests |
 | `run-without-test-changes` | false | Run even when no test files changed |
 | `max-changed-files` | 3000 | Above this, the result is inconclusive |
+
+## Test command setup
+
+These setups were checked against merged bug-fix pull requests in real projects. Use the test tool versions your project already pins.
+
+- pytest: `test-command: pytest --junitxml=junit.xml`, `junit-path: junit.xml`.
+- Vitest: `test-command: npx vitest run --reporter=junit --outputFile=junit.xml`, `junit-path: junit.xml`.
+- Jest: install the reporter in a setup step with `npm install --no-save jest-junit` (repeat it in `install-command` if you set one). Then `test-command: JEST_JUNIT_REPORT_TEST_SUITE_ERRORS=true JEST_JUNIT_ADD_FILE_ATTRIBUTE=true JEST_JUNIT_OUTPUT_FILE=junit.xml npx jest --ci --reporters=default --reporters=jest-junit`, `junit-path: junit.xml`. Both options matter: without the first, a test file that cannot load leaves nothing in the XML; without the second, its tests cannot be matched to that file, so a new module plus its tests ends up inconclusive instead of proof. Keep any environment your CI sets for tests, such as `TZ`.
+- node:test (Node 20 or newer): `test-command: node --test --test-reporter=junit --test-reporter-destination=junit.xml`, `junit-path: junit.xml`.
+- Go: install gotestsum in a setup step with `go install gotest.tools/gotestsum@v1.12.3`. Then `test-command: gotestsum --junitfile junit.xml -- ./...`, `junit-path: junit.xml`. A package that does not compile without the change counts as missing-code proof when the pull request changed a test file in that package.
+- Rust: use cargo-nextest with a config file that contains `[profile.default.junit]` and `path = "junit.xml"`. Then `test-command: cargo nextest run --no-fail-fast`, `junit-path: target/nextest/default/junit.xml`. Without `--no-fail-fast`, nextest stops at the first failure and the remaining tests cannot be compared. Test targets with `harness = false` need an explicit `--test <name>`. Doctests are not run. When the tests do not compile without the change, nextest writes no XML and redgreen falls back to comparing the whole command.
 
 ## report inputs
 

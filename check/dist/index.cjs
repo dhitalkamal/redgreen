@@ -100535,7 +100535,9 @@ var MISSING_CODE = [
   /unresolved import/,
   /does not provide an export named/,
   /does not contain a definition for/,
-  /Call to undefined (function|method)/
+  /Call to undefined (function|method)/,
+  // python: the test passes an argument the old signature does not have yet
+  /got an unexpected keyword argument/
 ];
 function isCodePath(path4) {
   return CODE_EXT.test(path4);
@@ -100545,7 +100547,8 @@ function firstLine(message, max = 200) {
   return (line ?? "").slice(0, max);
 }
 function oneLine(message, max = 200) {
-  return (message ?? "").split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0).join(" ").replace(/\s+/g, " ").slice(0, max);
+  const joined = (message ?? "").split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0).join(" ").replace(/\s+/g, " ");
+  return joined.length <= max ? joined : `${joined.slice(0, max - 4).trimEnd()} ...`;
 }
 function proofKind(message, viaLoadError) {
   if (viaLoadError) return "missing-code";
@@ -100589,6 +100592,25 @@ function moduleKey(value) {
   return value.replace(/\\/g, "/").replace(CODE_EXT, "").replace(/\//g, ".");
 }
 var covers = (key, loadKey) => key === loadKey || key.startsWith(`${loadKey}.`);
+var BUILD_FAILED = /\[(build|setup) failed\]/;
+var dirOf = (path4) => {
+  const slash = path4.lastIndexOf("/");
+  return slash < 0 ? "" : path4.slice(0, slash);
+};
+function rootSuite(tests) {
+  const names = [...new Set(tests.map((t) => t.suite).filter((s) => !!s))];
+  return names.find((s) => names.every((other) => other === s || other.startsWith(`${s}/`)));
+}
+function buildErrors(without, withChange, changedTestFiles) {
+  const dirs = changedTestFiles.map((f) => f.replace(/\\/g, "/")).filter((f) => f.endsWith("_test.go")).map(dirOf);
+  const root = rootSuite([...without, ...withChange]);
+  const owns = (suite) => dirs.some((d) => d === "" ? suite === root : suite === d || suite.endsWith(`/${d}`));
+  const errors = /* @__PURE__ */ new Map();
+  for (const t of without) {
+    if (t.status === "fail" && t.suite && BUILD_FAILED.test(t.message ?? "") && owns(t.suite)) errors.set(t.suite, t.message);
+  }
+  return errors;
+}
 function pairOutcome(before, after) {
   if (before === "skip" || after === "skip") return "ignored";
   if (before === "fail") return after === "pass" ? "proof" : "already-failing";
@@ -100606,6 +100628,13 @@ function compareRuns(without, withChange, opts) {
       if (key && changedKeys.has(key)) loadErrors.set(key, t.message);
     }
   }
+  const suiteErrors = buildErrors(without, withChange, opts.changedTestFiles);
+  const loadErrorFor = (t) => {
+    if (t.suite && suiteErrors.has(t.suite)) return { message: suiteErrors.get(t.suite) };
+    const keys = [t.classname, t.file].map(moduleKey).filter((k) => k !== "");
+    const loadKey = [...loadErrors.keys()].find((lk) => keys.some((k) => covers(k, lk)));
+    return loadKey === void 0 ? void 0 : { message: loadErrors.get(loadKey) };
+  };
   const items = [];
   for (const id of /* @__PURE__ */ new Set([...before.keys(), ...after.keys()])) {
     const b = before.get(id);
@@ -100616,13 +100645,12 @@ function compareRuns(without, withChange, opts) {
     if (flaky.has(id)) item.outcome = "ignored";
     else if (a && b) item.outcome = pairOutcome(b.status, a.status);
     else if (a) {
-      const keys = [a.classname, a.file].map(moduleKey).filter((k) => k !== "");
-      const loadKey = [...loadErrors.keys()].find((lk) => keys.some((k) => covers(k, lk)));
-      if (loadKey === void 0) item.outcome = a.status === "skip" ? "ignored" : "not-comparable";
+      const load = loadErrorFor(a);
+      if (!load) item.outcome = a.status === "skip" ? "ignored" : "not-comparable";
       else if (a.status === "pass") {
         item.outcome = "proof";
         item.viaLoadError = true;
-        item.withoutMessage = loadErrors.get(loadKey);
+        item.withoutMessage = load.message;
       } else item.outcome = a.status === "fail" ? "already-failing" : "ignored";
     }
     items.push(item);
@@ -101539,26 +101567,38 @@ function relativeTo(file2, roots) {
   return file2;
 }
 function testId(classname, name, file2) {
-  const scope = classname || file2 || "";
+  const scope = (classname !== name ? classname : "") || file2 || "";
   return scope ? `${scope}::${name}` : name;
 }
+var GO_MARKER = /^\s*(=== (RUN|PAUSE|CONT|NAME)\s|--- FAIL:)/;
 function messageOf(node2) {
   if (typeof node2 === "string") return str(node2.trim());
-  if (node2 && typeof node2 === "object") {
-    const n = node2;
-    return str(n.message) ?? str(typeof n["#text"] === "string" ? n["#text"].trim() : void 0);
+  if (!node2 || typeof node2 !== "object") return void 0;
+  const n = node2;
+  const attr = str(n.message);
+  const body2 = str(typeof n["#text"] === "string" ? n["#text"].trim() : void 0);
+  if (!attr || !body2) return attr ?? body2;
+  if (body2.startsWith(attr)) return body2;
+  if (/^\w+$/.test(attr)) {
+    const kept = body2.split(/\r?\n/).filter((line) => !GO_MARKER.test(line)).join("\n").trim();
+    return kept || body2;
   }
-  return void 0;
+  return attr;
+}
+function stripRoots(message, roots) {
+  if (!message) return message;
+  return roots.reduce((text2, root) => text2.replaceAll(`${root}${import_node_path.sep}`, ""), message);
 }
 function collect(suite, out, roots) {
+  const suiteName = str(suite.name);
   for (const tc of list(suite.testcase)) {
-    const name = String(tc.name ?? "");
-    const classname = String(tc.classname ?? "");
+    const name = String(tc.name ?? "").trim();
+    const classname = String(tc.classname ?? "").trim();
     const file2 = relativeTo(str(tc.file) ?? str(suite.file), roots);
     const failures = [...list(tc.failure), ...list(tc.error)];
     const status = failures.length > 0 ? "fail" : list(tc.skipped).length > 0 ? "skip" : "pass";
-    const message = failures.length > 0 ? messageOf(failures[0]) : void 0;
-    out.push({ id: testId(classname, name, file2), name, classname, file: file2, status, message });
+    const message = failures.length > 0 ? stripRoots(messageOf(failures[0]), roots) : void 0;
+    out.push({ id: testId(classname, name, file2), name, classname, file: file2, suite: suiteName, status, message });
   }
   for (const child of list(suite.testsuite)) collect(child, out, roots);
 }
@@ -101939,7 +101979,7 @@ var FILE_EXT = /\.(rs|py|js|jsx|ts|tsx|mjs|cjs|go|rb|java|kt|cs|php|c|h|cc|cpp|h
 var MAX_CANDIDATES = 30;
 var MAX_MISSING = 5;
 function looksLikeCode(token) {
-  if (/\s/.test(token)) return false;
+  if (/\s/.test(token) || token.includes("{{")) return false;
   return /[/_.]/.test(token) || token.endsWith("()") || /[a-z][A-Z]/.test(token);
 }
 var clean = (token) => token.trim().replace(/\(\)$/, "").replace(/^\.\//, "");
@@ -101960,6 +102000,14 @@ ${body2}`.replace(FENCE, " ").replace(URL2, " ");
   return found;
 }
 var isPath = (candidate) => candidate.includes("/") || FILE_EXT.test(candidate);
+function lastSegment(candidate) {
+  let bare = candidate;
+  for (let prev = ""; prev !== bare; ) {
+    prev = bare;
+    bare = bare.replace(/<[^<>]*>/g, "");
+  }
+  return bare.split(/::|\./).filter((part) => part.length > 0).pop() ?? candidate;
+}
 async function grepFinds(cwd, word) {
   try {
     await git(cwd, ["grep", "-q", "-w", "-F", "-e", word]);
@@ -101979,7 +102027,7 @@ async function findMissing(cwd, candidates) {
       const dir = candidate.replace(/\/$/, "");
       exists3 = files.some((f) => f === dir || f.endsWith(`/${dir}`) || f.startsWith(`${dir}/`));
     } else {
-      const last = candidate.split(".").pop() ?? candidate;
+      const last = lastSegment(candidate);
       exists3 = await grepFinds(cwd, candidate) || last !== candidate && await grepFinds(cwd, last);
     }
     if (!exists3) missing.push(candidate);

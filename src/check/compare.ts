@@ -25,6 +25,33 @@ export function moduleKey(value: string | undefined): string {
 
 const covers = (key: string, loadKey: string) => key === loadKey || key.startsWith(`${loadKey}.`);
 
+// gotestsum reports a go package that does not compile as one failing case with this marker
+const BUILD_FAILED = /\[(build|setup) failed\]/;
+
+const dirOf = (path: string) => {
+  const slash = path.lastIndexOf('/');
+  return slash < 0 ? '' : path.slice(0, slash);
+};
+
+// the module root package: the suite that every other go package path extends
+function rootSuite(tests: TestCase[]): string | undefined {
+  const names = [...new Set(tests.map((t) => t.suite).filter((s): s is string => !!s))];
+  return names.find((s) => names.every((other) => other === s || other.startsWith(`${s}/`)));
+}
+
+// go packages are named by import path, so a test file in dir d belongs to the suite
+// ending in /d; a test file at the repo root belongs to the module root
+function buildErrors(without: TestCase[], withChange: TestCase[], changedTestFiles: string[]): Map<string, string | undefined> {
+  const dirs = changedTestFiles.map((f) => f.replace(/\\/g, '/')).filter((f) => f.endsWith('_test.go')).map(dirOf);
+  const root = rootSuite([...without, ...withChange]);
+  const owns = (suite: string) => dirs.some((d) => (d === '' ? suite === root : suite === d || suite.endsWith(`/${d}`)));
+  const errors = new Map<string, string | undefined>();
+  for (const t of without) {
+    if (t.status === 'fail' && t.suite && BUILD_FAILED.test(t.message ?? '') && owns(t.suite)) errors.set(t.suite, t.message);
+  }
+  return errors;
+}
+
 function pairOutcome(before: TestCase['status'], after: TestCase['status']): Outcome {
   if (before === 'skip' || after === 'skip') return 'ignored';
   if (before === 'fail') return after === 'pass' ? 'proof' : 'already-failing';
@@ -48,6 +75,14 @@ export function compareRuns(
       if (key && changedKeys.has(key)) loadErrors.set(key, t.message);
     }
   }
+  // matched by exact suite: a parent package failing to build says nothing about sub-packages
+  const suiteErrors = buildErrors(without, withChange, opts.changedTestFiles);
+  const loadErrorFor = (t: TestCase): { message?: string } | undefined => {
+    if (t.suite && suiteErrors.has(t.suite)) return { message: suiteErrors.get(t.suite) };
+    const keys = [t.classname, t.file].map(moduleKey).filter((k) => k !== '');
+    const loadKey = [...loadErrors.keys()].find((lk) => keys.some((k) => covers(k, lk)));
+    return loadKey === undefined ? undefined : { message: loadErrors.get(loadKey) };
+  };
 
   const items: Compared[] = [];
   for (const id of new Set([...before.keys(), ...after.keys()])) {
@@ -59,13 +94,12 @@ export function compareRuns(
     if (flaky.has(id)) item.outcome = 'ignored';
     else if (a && b) item.outcome = pairOutcome(b.status, a.status);
     else if (a) {
-      const keys = [a.classname, a.file].map(moduleKey).filter((k) => k !== '');
-      const loadKey = [...loadErrors.keys()].find((lk) => keys.some((k) => covers(k, lk)));
-      if (loadKey === undefined) item.outcome = a.status === 'skip' ? 'ignored' : 'not-comparable';
+      const load = loadErrorFor(a);
+      if (!load) item.outcome = a.status === 'skip' ? 'ignored' : 'not-comparable';
       else if (a.status === 'pass') {
         item.outcome = 'proof';
         item.viaLoadError = true;
-        item.withoutMessage = loadErrors.get(loadKey);
+        item.withoutMessage = load.message;
       } else item.outcome = a.status === 'fail' ? 'already-failing' : 'ignored';
     }
     items.push(item);

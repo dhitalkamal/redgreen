@@ -62,6 +62,8 @@ describe('runEngine basics in exit-code mode', () => {
     const result = await runEngine(makeConfig(r.dir, `${node} tests/value.test.cjs`));
     expect(result.verdict).toBe('inconclusive');
     expect(result.reason).toMatch(/no install-command/);
+    // nothing ran without the change, so no whole-command comparison happened either
+    expect(result.flags).not.toContain('coarse');
   });
 
   it('stops early when the test command cannot start', async () => {

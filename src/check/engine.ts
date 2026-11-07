@@ -74,12 +74,16 @@ export async function runEngine(cfg: EngineConfig, log: Log = () => {}): Promise
     outputTails: { ...tails, without: withoutSide?.run.outputTail },
   };
 
-  if (!withSide.tests || !withoutSide?.tests) {
-    if (cfg.junitPath && withoutSide) flags.push(withSide.tests ? 'no-results-without-change' : 'junit-missing');
+  // no without run (deps without install, failed swap): nothing was compared, not even exit codes
+  if (!withoutSide) {
+    const reason = problem ?? 'the tests did not run without the change';
+    return { ...start, verdict: 'inconclusive', reason, flags, ...common };
+  }
+
+  if (!withSide.tests || !withoutSide.tests) {
+    if (cfg.junitPath) flags.push(withSide.tests ? 'no-results-without-change' : 'junit-missing');
     flags.push('coarse');
-    const decision: Decision = withoutSide
-      ? decideFallback(problem, withoutSide.run, withSide.run)
-      : { verdict: 'inconclusive', reason: problem ?? 'the tests did not run without the change' };
+    const decision: Decision = decideFallback(problem, withoutSide.run, withSide.run);
     return { ...start, ...decision, mode: 'exit-code', flags, ...common };
   }
 

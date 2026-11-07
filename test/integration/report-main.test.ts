@@ -129,6 +129,14 @@ describe('report main', () => {
     expect(state.warnings).toEqual([]);
   });
 
+  // the pr got a new push after this run started, so these results are stale
+  it('rejects results when the pull request head moved on', async () => {
+    state.pull = { ...state.pull, head: { sha: 'd'.repeat(40), repo: { full_name: 'fork/r' } } };
+    await main();
+    expect(kinds()).toEqual(['check']);
+    expect(check()).toMatchObject({ conclusion: 'neutral', output: { title: 'redgreen: results rejected' } });
+  });
+
   it('rejects a run whose head repository is gone (deleted fork)', async () => {
     state.context.payload = { workflow_run: { ...workflowRun, head_repository: null } };
     state.pull = { ...state.pull, head: { sha: H, repo: null } };

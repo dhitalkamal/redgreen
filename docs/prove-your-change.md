@@ -10,7 +10,7 @@ redgreen runs the tests your pull request adds or changes twice: once on the cod
 
 ## What each result means
 
-- No proof: your tests pass even without your code changes, so they do not exercise what you changed. Make the assertion check the new behavior.
+- No proof: no test fails without your code changes and passes with them, so the tests do not exercise what you changed. Make the assertion check the new behavior. If a new test fails even with your change, fix that test first.
 - No proof yet: your pull request has no test changes. Add a test, or explain in the pull request why none is possible (for example docs or a pure refactor).
 - Breaks tests: tests that passed before fail with your change. Fix them, or explain why the old behavior was wrong.
 - Inconclusive: redgreen could not compare cleanly, and the comment says why. This usually needs a maintainer to adjust the setup.

@@ -26,6 +26,8 @@ const MISSING_CODE: RegExp[] = [
   /does not provide an export named/,
   /does not contain a definition for/,
   /Call to undefined (function|method)/,
+  // python: the test passes an argument the old signature does not have yet
+  /got an unexpected keyword argument/,
 ];
 
 export function isCodePath(path: string): boolean {
@@ -38,6 +40,17 @@ export function firstLine(message: string | undefined, max = 200): string {
     .map((l) => l.trim())
     .find((l) => l.length > 0);
   return (line ?? '').slice(0, max);
+}
+
+// display form for pr comments: values often sit on later lines (node, jest)
+export function oneLine(message: string | undefined, max = 200): string {
+  const joined = (message ?? '')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
+    .join(' ')
+    .replace(/\s+/g, ' ');
+  return joined.length <= max ? joined : `${joined.slice(0, max - 4).trimEnd()} ...`;
 }
 
 export function proofKind(message: string | undefined, viaLoadError: boolean): ProofKind {

@@ -10,7 +10,8 @@ const MAX_CANDIDATES = 30;
 const MAX_MISSING = 5;
 
 export function looksLikeCode(token: string): boolean {
-  if (/\s/.test(token)) return false;
+  // {{.Name}} is go or handlebars template syntax, not a name to look up
+  if (/\s/.test(token) || token.includes('{{')) return false;
   return /[/_.]/.test(token) || token.endsWith('()') || /[a-z][A-Z]/.test(token);
 }
 
@@ -35,6 +36,16 @@ export function extractCandidates(title: string, body: string): string[] {
 
 const isPath = (candidate: string) => candidate.includes('/') || FILE_EXT.test(candidate);
 
+// the definition spells only the last identifier: Value::<T>::deserialize_struct -> deserialize_struct
+function lastSegment(candidate: string): string {
+  let bare = candidate;
+  for (let prev = ''; prev !== bare; ) {
+    prev = bare;
+    bare = bare.replace(/<[^<>]*>/g, '');
+  }
+  return bare.split(/::|\./).filter((part) => part.length > 0).pop() ?? candidate;
+}
+
 async function grepFinds(cwd: string, word: string): Promise<boolean> {
   try {
     await git(cwd, ['grep', '-q', '-w', '-F', '-e', word]);
@@ -56,7 +67,7 @@ export async function findMissing(cwd: string, candidates: string[]): Promise<st
       const dir = candidate.replace(/\/$/, '');
       exists = files.some((f) => f === dir || f.endsWith(`/${dir}`) || f.startsWith(`${dir}/`));
     } else {
-      const last = candidate.split('.').pop() ?? candidate;
+      const last = lastSegment(candidate);
       exists = (await grepFinds(cwd, candidate)) || (last !== candidate && (await grepFinds(cwd, last)));
     }
     if (!exists) missing.push(candidate);

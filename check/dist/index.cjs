@@ -25687,8 +25687,8 @@ var require_readdir_glob = __commonJS({
           useStat = true;
         }
         const filename = dir + "/" + name;
-        const relative2 = filename.slice(1);
-        const absolute = path4 + "/" + relative2;
+        const relative3 = filename.slice(1);
+        const absolute = path4 + "/" + relative3;
         let stats = null;
         if (useStat || followSymlinks) {
           stats = await stat3(absolute, followSymlinks);
@@ -25700,12 +25700,12 @@ var require_readdir_glob = __commonJS({
           stats = { isDirectory: () => false };
         }
         if (stats.isDirectory()) {
-          if (!shouldSkip(relative2)) {
-            yield { relative: relative2, absolute, stats };
+          if (!shouldSkip(relative3)) {
+            yield { relative: relative3, absolute, stats };
             yield* exploreWalkAsync(filename, path4, followSymlinks, useStat, shouldSkip, false);
           }
         } else {
-          yield { relative: relative2, absolute, stats };
+          yield { relative: relative3, absolute, stats };
         }
       }
     }
@@ -25775,11 +25775,11 @@ var require_readdir_glob = __commonJS({
         }
         setTimeout(() => this._next(), 0);
       }
-      _shouldSkipDirectory(relative2) {
-        return this.skipMatchers.some((m) => m.match(relative2));
+      _shouldSkipDirectory(relative3) {
+        return this.skipMatchers.some((m) => m.match(relative3));
       }
-      _fileMatches(relative2, isDirectory2) {
-        const file2 = relative2 + (isDirectory2 ? "/" : "");
+      _fileMatches(relative3, isDirectory2) {
+        const file2 = relative3 + (isDirectory2 ? "/" : "");
         return (this.matchers.length === 0 || this.matchers.some((m) => m.match(file2))) && !this.ignoreMatchers.some((m) => m.match(file2)) && (!this.options.nodir || !isDirectory2);
       }
       _next() {
@@ -25788,16 +25788,16 @@ var require_readdir_glob = __commonJS({
             if (!obj.done) {
               const isDirectory2 = obj.value.stats.isDirectory();
               if (this._fileMatches(obj.value.relative, isDirectory2)) {
-                let relative2 = obj.value.relative;
+                let relative3 = obj.value.relative;
                 let absolute = obj.value.absolute;
                 if (this.options.mark && isDirectory2) {
-                  relative2 += "/";
+                  relative3 += "/";
                   absolute += "/";
                 }
                 if (this.options.stat) {
-                  this.emit("match", { relative: relative2, absolute, stat: obj.value.stats });
+                  this.emit("match", { relative: relative3, absolute, stat: obj.value.stats });
                 } else {
-                  this.emit("match", { relative: relative2, absolute });
+                  this.emit("match", { relative: relative3, absolute });
                 }
               }
               this._next(this.iterator);
@@ -31302,8 +31302,8 @@ var require_primordials = __commonJS({
       ArrayPrototypeIndexOf(self2, el) {
         return self2.indexOf(el);
       },
-      ArrayPrototypeJoin(self2, sep4) {
-        return self2.join(sep4);
+      ArrayPrototypeJoin(self2, sep5) {
+        return self2.join(sep5);
       },
       ArrayPrototypeMap(self2, fn) {
         return self2.map(fn);
@@ -43546,7 +43546,7 @@ var require_commonjs6 = __commonJS({
        *
        * @internal
        */
-      constructor(cwd = process.cwd(), pathImpl, sep4, { nocase, childrenCacheSize = 16 * 1024, fs: fs8 = defaultFS } = {}) {
+      constructor(cwd = process.cwd(), pathImpl, sep5, { nocase, childrenCacheSize = 16 * 1024, fs: fs8 = defaultFS } = {}) {
         this.#fs = fsFromOption(fs8);
         if (cwd instanceof URL || cwd.startsWith("file://")) {
           cwd = (0, node_url_1.fileURLToPath)(cwd);
@@ -43557,7 +43557,7 @@ var require_commonjs6 = __commonJS({
         this.#resolveCache = new ResolveCache();
         this.#resolvePosixCache = new ResolveCache();
         this.#children = new ChildrenCache(childrenCacheSize);
-        const split = cwdPath.substring(this.rootPath.length).split(sep4);
+        const split = cwdPath.substring(this.rootPath.length).split(sep5);
         if (split.length === 1 && !split[0]) {
           split.pop();
         }
@@ -44400,10 +44400,10 @@ var require_ignore = __commonJS({
       ignored(p) {
         const fullpath = p.fullpath();
         const fullpaths = `${fullpath}/`;
-        const relative2 = p.relative() || ".";
-        const relatives = `${relative2}/`;
+        const relative3 = p.relative() || ".";
+        const relatives = `${relative3}/`;
         for (const m of this.relative) {
-          if (m.match(relative2) || m.match(relatives))
+          if (m.match(relative3) || m.match(relatives))
             return true;
         }
         for (const m of this.absolute) {
@@ -44414,9 +44414,9 @@ var require_ignore = __commonJS({
       }
       childrenIgnored(p) {
         const fullpath = p.fullpath() + "/";
-        const relative2 = (p.relative() || ".") + "/";
+        const relative3 = (p.relative() || ".") + "/";
         for (const m of this.relativeChildren) {
-          if (m.match(relative2))
+          if (m.match(relative3))
             return true;
         }
         for (const m of this.absoluteChildren) {
@@ -56008,7 +56008,7 @@ var require_picomatch2 = __commonJS({
 // src/check/main.ts
 var import_promises6 = require("node:fs/promises");
 var import_node_os3 = require("node:os");
-var import_node_path2 = require("node:path");
+var import_node_path3 = require("node:path");
 
 // node_modules/@actions/core/lib/command.js
 var os = __toESM(require("os"), 1);
@@ -66675,21 +66675,21 @@ var Matcher = class {
    * @returns {string}
    */
   toString(separator, includeNamespace = true) {
-    const sep4 = separator || this.separator;
-    const isDefault = sep4 === this.separator && includeNamespace === true;
+    const sep5 = separator || this.separator;
+    const isDefault = sep5 === this.separator && includeNamespace === true;
     if (isDefault) {
       if (this._pathStringCache !== null) {
         return this._pathStringCache;
       }
       const result = this.path.map(
         (n) => n.namespace ? `${n.namespace}:${n.tag}` : n.tag
-      ).join(sep4);
+      ).join(sep5);
       this._pathStringCache = result;
       return result;
     }
     return this.path.map(
       (n) => includeNamespace && n.namespace ? `${n.namespace}:${n.tag}` : n.tag
-    ).join(sep4);
+    ).join(sep5);
   }
   /**
    * Get path as array of tag names.
@@ -100535,7 +100535,9 @@ var MISSING_CODE = [
   /unresolved import/,
   /does not provide an export named/,
   /does not contain a definition for/,
-  /Call to undefined (function|method)/
+  /Call to undefined (function|method)/,
+  // python: the test passes an argument the old signature does not have yet
+  /got an unexpected keyword argument/
 ];
 function isCodePath(path4) {
   return CODE_EXT.test(path4);
@@ -100543,6 +100545,10 @@ function isCodePath(path4) {
 function firstLine(message, max = 200) {
   const line = (message ?? "").split(/\r?\n/).map((l) => l.trim()).find((l) => l.length > 0);
   return (line ?? "").slice(0, max);
+}
+function oneLine(message, max = 200) {
+  const joined = (message ?? "").split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0).join(" ").replace(/\s+/g, " ");
+  return joined.length <= max ? joined : `${joined.slice(0, max - 4).trimEnd()} ...`;
 }
 function proofKind(message, viaLoadError) {
   if (viaLoadError) return "missing-code";
@@ -100586,6 +100592,25 @@ function moduleKey(value) {
   return value.replace(/\\/g, "/").replace(CODE_EXT, "").replace(/\//g, ".");
 }
 var covers = (key, loadKey) => key === loadKey || key.startsWith(`${loadKey}.`);
+var BUILD_FAILED = /\[(build|setup) failed\]/;
+var dirOf = (path4) => {
+  const slash = path4.lastIndexOf("/");
+  return slash < 0 ? "" : path4.slice(0, slash);
+};
+function rootSuite(tests) {
+  const names = [...new Set(tests.map((t) => t.suite).filter((s) => !!s))];
+  return names.find((s) => names.every((other) => other === s || other.startsWith(`${s}/`)));
+}
+function buildErrors(without, withChange, changedTestFiles) {
+  const dirs = changedTestFiles.map((f) => f.replace(/\\/g, "/")).filter((f) => f.endsWith("_test.go")).map(dirOf);
+  const root = rootSuite([...without, ...withChange]);
+  const owns = (suite) => dirs.some((d) => d === "" ? suite === root : suite === d || suite.endsWith(`/${d}`));
+  const errors = /* @__PURE__ */ new Map();
+  for (const t of without) {
+    if (t.status === "fail" && t.suite && BUILD_FAILED.test(t.message ?? "") && owns(t.suite)) errors.set(t.suite, t.message);
+  }
+  return errors;
+}
 function pairOutcome(before, after) {
   if (before === "skip" || after === "skip") return "ignored";
   if (before === "fail") return after === "pass" ? "proof" : "already-failing";
@@ -100603,6 +100628,13 @@ function compareRuns(without, withChange, opts) {
       if (key && changedKeys.has(key)) loadErrors.set(key, t.message);
     }
   }
+  const suiteErrors = buildErrors(without, withChange, opts.changedTestFiles);
+  const loadErrorFor = (t) => {
+    if (t.suite && suiteErrors.has(t.suite)) return { message: suiteErrors.get(t.suite) };
+    const keys = [t.classname, t.file].map(moduleKey).filter((k) => k !== "");
+    const loadKey = [...loadErrors.keys()].find((lk) => keys.some((k) => covers(k, lk)));
+    return loadKey === void 0 ? void 0 : { message: loadErrors.get(loadKey) };
+  };
   const items = [];
   for (const id of /* @__PURE__ */ new Set([...before.keys(), ...after.keys()])) {
     const b = before.get(id);
@@ -100613,13 +100645,12 @@ function compareRuns(without, withChange, opts) {
     if (flaky.has(id)) item.outcome = "ignored";
     else if (a && b) item.outcome = pairOutcome(b.status, a.status);
     else if (a) {
-      const keys = [a.classname, a.file].map(moduleKey).filter((k) => k !== "");
-      const loadKey = [...loadErrors.keys()].find((lk) => keys.some((k) => covers(k, lk)));
-      if (loadKey === void 0) item.outcome = a.status === "skip" ? "ignored" : "not-comparable";
+      const load = loadErrorFor(a);
+      if (!load) item.outcome = a.status === "skip" ? "ignored" : "not-comparable";
       else if (a.status === "pass") {
         item.outcome = "proof";
         item.viaLoadError = true;
-        item.withoutMessage = loadErrors.get(loadKey);
+        item.withoutMessage = load.message;
       } else item.outcome = a.status === "fail" ? "already-failing" : "ignored";
     }
     items.push(item);
@@ -100689,11 +100720,11 @@ function toEntries(cmp, touched) {
   const proof = cmp.items.filter((i) => i.outcome === "proof").map((i) => ({
     id: i.id,
     file: i.file,
-    message: firstLine(i.withoutMessage),
+    message: oneLine(i.withoutMessage),
     kind: proofKind(i.withoutMessage, i.viaLoadError),
     suspect: isSuspect(i.withoutMessage, touched)
   }));
-  const broken = cmp.items.filter((i) => i.outcome === "broken").map((i) => ({ id: i.id, file: i.file, message: firstLine(i.withMessage) }));
+  const broken = cmp.items.filter((i) => i.outcome === "broken").map((i) => ({ id: i.id, file: i.file, message: oneLine(i.withMessage) }));
   return { proof, broken };
 }
 function toCounts(cmp, flaky) {
@@ -100740,6 +100771,7 @@ function git(cwd, args, input2) {
 
 // src/check/junit.ts
 var import_promises4 = require("node:fs/promises");
+var import_node_path = require("node:path");
 
 // node_modules/tinyglobby/dist/index.mjs
 var import_fs3 = require("fs");
@@ -101511,8 +101543,8 @@ function getCrawler(globInput, inputOptions = {}) {
   return patterns.length > 0 ? buildCrawler(options, patterns) : [];
 }
 async function glob(globInput, options) {
-  const [crawler, relative2] = getCrawler(globInput, options);
-  return crawler ? formatPaths(await crawler.withPromise(), relative2) : [];
+  const [crawler, relative3] = getCrawler(globInput, options);
+  return crawler ? formatPaths(await crawler.withPromise(), relative3) : [];
 }
 
 // src/check/junit.ts
@@ -101520,35 +101552,57 @@ var parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "",
   parseAttributeValue: false,
+  // decodes numeric references like &#10;, which node uses for newlines in messages
+  htmlEntities: true,
   isArray: (name) => ["testsuite", "testcase", "failure", "error", "skipped"].includes(name)
 });
 var list = (value) => value === void 0 || value === "" ? [] : Array.isArray(value) ? value : [value];
 var str = (value) => typeof value === "string" && value !== "" ? value : void 0;
+function relativeTo(file2, roots) {
+  if (!file2 || !(0, import_node_path.isAbsolute)(file2)) return file2;
+  for (const root of roots) {
+    const rel = (0, import_node_path.relative)(root, file2);
+    if (rel !== "" && !rel.startsWith("..") && !(0, import_node_path.isAbsolute)(rel)) return rel.split(import_node_path.sep).join("/");
+  }
+  return file2;
+}
 function testId(classname, name, file2) {
-  const scope = classname || file2 || "";
+  const scope = (classname !== name ? classname : "") || file2 || "";
   return scope ? `${scope}::${name}` : name;
 }
+var GO_MARKER = /^\s*(=== (RUN|PAUSE|CONT|NAME)\s|--- FAIL:)/;
 function messageOf(node2) {
   if (typeof node2 === "string") return str(node2.trim());
-  if (node2 && typeof node2 === "object") {
-    const n = node2;
-    return str(n.message) ?? str(typeof n["#text"] === "string" ? n["#text"].trim() : void 0);
+  if (!node2 || typeof node2 !== "object") return void 0;
+  const n = node2;
+  const attr = str(n.message);
+  const body2 = str(typeof n["#text"] === "string" ? n["#text"].trim() : void 0);
+  if (!attr || !body2) return attr ?? body2;
+  if (body2.startsWith(attr)) return body2;
+  if (/^\w+$/.test(attr)) {
+    const kept = body2.split(/\r?\n/).filter((line) => !GO_MARKER.test(line)).join("\n").trim();
+    return kept || body2;
   }
-  return void 0;
+  return attr;
 }
-function collect(suite, out) {
+function stripRoots(message, roots) {
+  if (!message) return message;
+  return roots.reduce((text2, root) => text2.replaceAll(`${root}${import_node_path.sep}`, ""), message);
+}
+function collect(suite, out, roots) {
+  const suiteName = str(suite.name);
   for (const tc of list(suite.testcase)) {
-    const name = String(tc.name ?? "");
-    const classname = String(tc.classname ?? "");
-    const file2 = str(tc.file) ?? str(suite.file);
+    const name = String(tc.name ?? "").trim();
+    const classname = String(tc.classname ?? "").trim();
+    const file2 = relativeTo(str(tc.file) ?? str(suite.file), roots);
     const failures = [...list(tc.failure), ...list(tc.error)];
     const status = failures.length > 0 ? "fail" : list(tc.skipped).length > 0 ? "skip" : "pass";
-    const message = failures.length > 0 ? messageOf(failures[0]) : void 0;
-    out.push({ id: testId(classname, name, file2), name, classname, file: file2, status, message });
+    const message = failures.length > 0 ? stripRoots(messageOf(failures[0]), roots) : void 0;
+    out.push({ id: testId(classname, name, file2), name, classname, file: file2, suite: suiteName, status, message });
   }
-  for (const child of list(suite.testsuite)) collect(child, out);
+  for (const child of list(suite.testsuite)) collect(child, out, roots);
 }
-function parseJUnit(xml) {
+function parseJUnit(xml, roots = []) {
   const valid = XMLValidator.validate(xml);
   if (valid !== true) throw new Error(`unreadable JUnit XML: ${valid.err.msg}`);
   const doc = parser.parse(xml);
@@ -101557,16 +101611,18 @@ function parseJUnit(xml) {
   }
   const root = doc.testsuites && typeof doc.testsuites === "object" ? doc.testsuites : {};
   const out = [];
-  for (const suite of [...list(root.testsuite), ...list(doc.testsuite)]) collect(suite, out);
+  collect(root, out, roots);
+  for (const suite of list(doc.testsuite)) collect(suite, out, roots);
   return out;
 }
 async function readJUnitFiles(cwd, pattern) {
   const paths = (await glob([pattern], { cwd, absolute: true, dot: true })).sort();
+  const roots = [cwd, await (0, import_promises4.realpath)(cwd).catch(() => cwd)];
   const tests = [];
   const errors = [];
   for (const path4 of paths) {
     try {
-      tests.push(...parseJUnit(await (0, import_promises4.readFile)(path4, "utf8")));
+      tests.push(...parseJUnit(await (0, import_promises4.readFile)(path4, "utf8"), roots));
     } catch (error63) {
       errors.push(`${path4}: ${error63.message}`);
     }
@@ -101670,7 +101726,7 @@ async function runInstall(cfg, label, log3) {
 // src/check/swap.ts
 var import_node_fs2 = require("node:fs");
 var import_promises5 = require("node:fs/promises");
-var import_node_path = require("node:path");
+var import_node_path2 = require("node:path");
 function planSwap(files) {
   const apply = [];
   const undo = [];
@@ -101709,7 +101765,7 @@ async function runOps(cwd, refs, ops) {
     );
   }
   for (const op of ops) {
-    if (op.kind === "remove") await (0, import_promises5.rm)((0, import_node_path.join)(cwd, op.path), { force: true });
+    if (op.kind === "remove") await (0, import_promises5.rm)((0, import_node_path2.join)(cwd, op.path), { force: true });
   }
 }
 async function trackedSnapshot(cwd) {
@@ -101719,7 +101775,7 @@ async function trackedSnapshot(cwd) {
 async function verifyRestored(cwd, plan, snapshot2) {
   if (await trackedSnapshot(cwd) !== snapshot2) return "tracked files differ from before the swap";
   for (const op of plan.undo) {
-    if (op.kind === "remove" && (0, import_node_fs2.existsSync)((0, import_node_path.join)(cwd, op.path))) {
+    if (op.kind === "remove" && (0, import_node_fs2.existsSync)((0, import_node_path2.join)(cwd, op.path))) {
       return `${op.path} should not exist after restore`;
     }
   }
@@ -101923,7 +101979,7 @@ var FILE_EXT = /\.(rs|py|js|jsx|ts|tsx|mjs|cjs|go|rb|java|kt|cs|php|c|h|cc|cpp|h
 var MAX_CANDIDATES = 30;
 var MAX_MISSING = 5;
 function looksLikeCode(token) {
-  if (/\s/.test(token)) return false;
+  if (/\s/.test(token) || token.includes("{{")) return false;
   return /[/_.]/.test(token) || token.endsWith("()") || /[a-z][A-Z]/.test(token);
 }
 var clean = (token) => token.trim().replace(/\(\)$/, "").replace(/^\.\//, "");
@@ -101944,6 +102000,14 @@ ${body2}`.replace(FENCE, " ").replace(URL2, " ");
   return found;
 }
 var isPath = (candidate) => candidate.includes("/") || FILE_EXT.test(candidate);
+function lastSegment(candidate) {
+  let bare = candidate;
+  for (let prev = ""; prev !== bare; ) {
+    prev = bare;
+    bare = bare.replace(/<[^<>]*>/g, "");
+  }
+  return bare.split(/::|\./).filter((part) => part.length > 0).pop() ?? candidate;
+}
 async function grepFinds(cwd, word) {
   try {
     await git(cwd, ["grep", "-q", "-w", "-F", "-e", word]);
@@ -101963,7 +102027,7 @@ async function findMissing(cwd, candidates) {
       const dir = candidate.replace(/\/$/, "");
       exists3 = files.some((f) => f === dir || f.endsWith(`/${dir}`) || f.startsWith(`${dir}/`));
     } else {
-      const last = candidate.split(".").pop() ?? candidate;
+      const last = lastSegment(candidate);
       exists3 = await grepFinds(cwd, candidate) || last !== candidate && await grepFinds(cwd, last);
     }
     if (!exists3) missing.push(candidate);
@@ -121761,8 +121825,8 @@ async function run() {
     mentionsNotFound: mentions
   });
   await summary.addRaw(renderSummary(results, result.outputTails)).write();
-  const dir = await (0, import_promises6.mkdtemp)((0, import_node_path2.join)((0, import_node_os3.tmpdir)(), "redgreen-"));
-  const file2 = (0, import_node_path2.join)(dir, "results.json");
+  const dir = await (0, import_promises6.mkdtemp)((0, import_node_path3.join)((0, import_node_os3.tmpdir)(), "redgreen-"));
+  const file2 = (0, import_node_path3.join)(dir, "results.json");
   await (0, import_promises6.writeFile)(file2, JSON.stringify(results));
   await new DefaultArtifactClient().uploadArtifact(ARTIFACT_NAME, [file2], dir, { retentionDays: 7 });
   setOutput("verdict", results.verdict);

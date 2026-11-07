@@ -29,7 +29,48 @@ const NODE = `<?xml version="1.0" encoding="utf-8"?>
 <!-- tests 2 -->
 </testsuites>`;
 
+// trimmed from real gotestsum 1.12 output: a package that does not compile becomes a
+// synthetic TestMain with no classname; every failure message attribute is just "Failed"
+const GOTESTSUM = `<testsuites>
+<testsuite tests="0" name="github.com/spf13/cobra"><testcase classname="" name="TestMain" time="0.000000"><failure message="Failed" type="">FAIL&#x9;github.com/spf13/cobra [build failed]&#xA;</failure></testcase></testsuite>
+<testsuite tests="1" name="github.com/spf13/cobra/doc"><testcase classname="github.com/spf13/cobra/doc" name="TestGenManDoc" time="0.000000"><failure message="Failed" type="">=== RUN   TestGenManDoc&#xA;    man_docs_test.go:40: got 1 want 2&#xA;--- FAIL: TestGenManDoc (0.00s)&#xA;</failure></testcase></testsuite>
+</testsuites>`;
+
+// trimmed from real cargo-nextest output: the attribute holds only the panic location
+const NEXTEST = `<testsuites><testsuite name="toml_writer::string">
+<testcase name="many_quotes" classname="toml_writer::string"><failure message="thread &apos;many_quotes&apos; (20525) panicked at crates/toml_writer/src/string.rs:352:17" type="test failure with exit code 101">thread &apos;many_quotes&apos; (20525) panicked at crates/toml_writer/src/string.rs:352:17:
+attempt to add with overflow</failure><system-out>running 1 test</system-out></testcase>
+</testsuite></testsuites>`;
+
 describe('parseJUnit', () => {
+  it('reads the go output from the body when the attribute only says Failed', () => {
+    const tests = parseJUnit(GOTESTSUM);
+    expect(tests[0]?.message).toBe('FAIL\tgithub.com/spf13/cobra [build failed]');
+    expect(tests[1]?.message).toBe('man_docs_test.go:40: got 1 want 2');
+  });
+
+  it('records the suite each case came from', () => {
+    expect(parseJUnit(GOTESTSUM).map((t) => t.suite)).toEqual(['github.com/spf13/cobra', 'github.com/spf13/cobra/doc']);
+  });
+
+  it('reads the panic text that nextest puts after the location', () => {
+    expect(parseJUnit(NEXTEST)[0]?.message).toBe(
+      "thread 'many_quotes' (20525) panicked at crates/toml_writer/src/string.rs:352:17:\nattempt to add with overflow",
+    );
+  });
+
+  // jest-junit copies the full title into both classname and name by default
+  it('does not repeat the title when classname equals name', () => {
+    expect(parseJUnit(JEST)[0]?.id).toBe('parser handles unicode');
+    const padded = '<testsuites><testcase classname=" adds" name=" adds" file="a.test.js"/></testsuites>';
+    expect(parseJUnit(padded)[0]?.id).toBe('a.test.js::adds');
+  });
+
+  it('drops the run directory from paths inside messages', () => {
+    const xml = '<testsuites><testcase name="t" classname="c"><failure message="boom at /w/tests/x.test.js:3:5"/></testcase></testsuites>';
+    expect(parseJUnit(xml, ['/w'])[0]?.message).toBe('boom at tests/x.test.js:3:5');
+  });
+
   it('reads pytest output including errors and skips', () => {
     const tests = parseJUnit(PYTEST);
     expect(tests.map((t) => [t.id, t.status])).toEqual([

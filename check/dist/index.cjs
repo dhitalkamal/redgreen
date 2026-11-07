@@ -25687,8 +25687,8 @@ var require_readdir_glob = __commonJS({
           useStat = true;
         }
         const filename = dir + "/" + name;
-        const relative2 = filename.slice(1);
-        const absolute = path4 + "/" + relative2;
+        const relative3 = filename.slice(1);
+        const absolute = path4 + "/" + relative3;
         let stats = null;
         if (useStat || followSymlinks) {
           stats = await stat3(absolute, followSymlinks);
@@ -25700,12 +25700,12 @@ var require_readdir_glob = __commonJS({
           stats = { isDirectory: () => false };
         }
         if (stats.isDirectory()) {
-          if (!shouldSkip(relative2)) {
-            yield { relative: relative2, absolute, stats };
+          if (!shouldSkip(relative3)) {
+            yield { relative: relative3, absolute, stats };
             yield* exploreWalkAsync(filename, path4, followSymlinks, useStat, shouldSkip, false);
           }
         } else {
-          yield { relative: relative2, absolute, stats };
+          yield { relative: relative3, absolute, stats };
         }
       }
     }
@@ -25775,11 +25775,11 @@ var require_readdir_glob = __commonJS({
         }
         setTimeout(() => this._next(), 0);
       }
-      _shouldSkipDirectory(relative2) {
-        return this.skipMatchers.some((m) => m.match(relative2));
+      _shouldSkipDirectory(relative3) {
+        return this.skipMatchers.some((m) => m.match(relative3));
       }
-      _fileMatches(relative2, isDirectory2) {
-        const file2 = relative2 + (isDirectory2 ? "/" : "");
+      _fileMatches(relative3, isDirectory2) {
+        const file2 = relative3 + (isDirectory2 ? "/" : "");
         return (this.matchers.length === 0 || this.matchers.some((m) => m.match(file2))) && !this.ignoreMatchers.some((m) => m.match(file2)) && (!this.options.nodir || !isDirectory2);
       }
       _next() {
@@ -25788,16 +25788,16 @@ var require_readdir_glob = __commonJS({
             if (!obj.done) {
               const isDirectory2 = obj.value.stats.isDirectory();
               if (this._fileMatches(obj.value.relative, isDirectory2)) {
-                let relative2 = obj.value.relative;
+                let relative3 = obj.value.relative;
                 let absolute = obj.value.absolute;
                 if (this.options.mark && isDirectory2) {
-                  relative2 += "/";
+                  relative3 += "/";
                   absolute += "/";
                 }
                 if (this.options.stat) {
-                  this.emit("match", { relative: relative2, absolute, stat: obj.value.stats });
+                  this.emit("match", { relative: relative3, absolute, stat: obj.value.stats });
                 } else {
-                  this.emit("match", { relative: relative2, absolute });
+                  this.emit("match", { relative: relative3, absolute });
                 }
               }
               this._next(this.iterator);
@@ -31302,8 +31302,8 @@ var require_primordials = __commonJS({
       ArrayPrototypeIndexOf(self2, el) {
         return self2.indexOf(el);
       },
-      ArrayPrototypeJoin(self2, sep4) {
-        return self2.join(sep4);
+      ArrayPrototypeJoin(self2, sep5) {
+        return self2.join(sep5);
       },
       ArrayPrototypeMap(self2, fn) {
         return self2.map(fn);
@@ -43546,7 +43546,7 @@ var require_commonjs6 = __commonJS({
        *
        * @internal
        */
-      constructor(cwd = process.cwd(), pathImpl, sep4, { nocase, childrenCacheSize = 16 * 1024, fs: fs8 = defaultFS } = {}) {
+      constructor(cwd = process.cwd(), pathImpl, sep5, { nocase, childrenCacheSize = 16 * 1024, fs: fs8 = defaultFS } = {}) {
         this.#fs = fsFromOption(fs8);
         if (cwd instanceof URL || cwd.startsWith("file://")) {
           cwd = (0, node_url_1.fileURLToPath)(cwd);
@@ -43557,7 +43557,7 @@ var require_commonjs6 = __commonJS({
         this.#resolveCache = new ResolveCache();
         this.#resolvePosixCache = new ResolveCache();
         this.#children = new ChildrenCache(childrenCacheSize);
-        const split = cwdPath.substring(this.rootPath.length).split(sep4);
+        const split = cwdPath.substring(this.rootPath.length).split(sep5);
         if (split.length === 1 && !split[0]) {
           split.pop();
         }
@@ -44400,10 +44400,10 @@ var require_ignore = __commonJS({
       ignored(p) {
         const fullpath = p.fullpath();
         const fullpaths = `${fullpath}/`;
-        const relative2 = p.relative() || ".";
-        const relatives = `${relative2}/`;
+        const relative3 = p.relative() || ".";
+        const relatives = `${relative3}/`;
         for (const m of this.relative) {
-          if (m.match(relative2) || m.match(relatives))
+          if (m.match(relative3) || m.match(relatives))
             return true;
         }
         for (const m of this.absolute) {
@@ -44414,9 +44414,9 @@ var require_ignore = __commonJS({
       }
       childrenIgnored(p) {
         const fullpath = p.fullpath() + "/";
-        const relative2 = (p.relative() || ".") + "/";
+        const relative3 = (p.relative() || ".") + "/";
         for (const m of this.relativeChildren) {
-          if (m.match(relative2))
+          if (m.match(relative3))
             return true;
         }
         for (const m of this.absoluteChildren) {
@@ -56008,7 +56008,7 @@ var require_picomatch2 = __commonJS({
 // src/check/main.ts
 var import_promises6 = require("node:fs/promises");
 var import_node_os3 = require("node:os");
-var import_node_path2 = require("node:path");
+var import_node_path3 = require("node:path");
 
 // node_modules/@actions/core/lib/command.js
 var os = __toESM(require("os"), 1);
@@ -66675,21 +66675,21 @@ var Matcher = class {
    * @returns {string}
    */
   toString(separator, includeNamespace = true) {
-    const sep4 = separator || this.separator;
-    const isDefault = sep4 === this.separator && includeNamespace === true;
+    const sep5 = separator || this.separator;
+    const isDefault = sep5 === this.separator && includeNamespace === true;
     if (isDefault) {
       if (this._pathStringCache !== null) {
         return this._pathStringCache;
       }
       const result = this.path.map(
         (n) => n.namespace ? `${n.namespace}:${n.tag}` : n.tag
-      ).join(sep4);
+      ).join(sep5);
       this._pathStringCache = result;
       return result;
     }
     return this.path.map(
       (n) => includeNamespace && n.namespace ? `${n.namespace}:${n.tag}` : n.tag
-    ).join(sep4);
+    ).join(sep5);
   }
   /**
    * Get path as array of tag names.
@@ -100740,6 +100740,7 @@ function git(cwd, args, input2) {
 
 // src/check/junit.ts
 var import_promises4 = require("node:fs/promises");
+var import_node_path = require("node:path");
 
 // node_modules/tinyglobby/dist/index.mjs
 var import_fs3 = require("fs");
@@ -101511,8 +101512,8 @@ function getCrawler(globInput, inputOptions = {}) {
   return patterns.length > 0 ? buildCrawler(options, patterns) : [];
 }
 async function glob(globInput, options) {
-  const [crawler, relative2] = getCrawler(globInput, options);
-  return crawler ? formatPaths(await crawler.withPromise(), relative2) : [];
+  const [crawler, relative3] = getCrawler(globInput, options);
+  return crawler ? formatPaths(await crawler.withPromise(), relative3) : [];
 }
 
 // src/check/junit.ts
@@ -101524,6 +101525,14 @@ var parser = new XMLParser({
 });
 var list = (value) => value === void 0 || value === "" ? [] : Array.isArray(value) ? value : [value];
 var str = (value) => typeof value === "string" && value !== "" ? value : void 0;
+function relativeTo(file2, roots) {
+  if (!file2 || !(0, import_node_path.isAbsolute)(file2)) return file2;
+  for (const root of roots) {
+    const rel = (0, import_node_path.relative)(root, file2);
+    if (rel !== "" && !rel.startsWith("..") && !(0, import_node_path.isAbsolute)(rel)) return rel.split(import_node_path.sep).join("/");
+  }
+  return file2;
+}
 function testId(classname, name, file2) {
   const scope = classname || file2 || "";
   return scope ? `${scope}::${name}` : name;
@@ -101536,19 +101545,19 @@ function messageOf(node2) {
   }
   return void 0;
 }
-function collect(suite, out) {
+function collect(suite, out, roots) {
   for (const tc of list(suite.testcase)) {
     const name = String(tc.name ?? "");
     const classname = String(tc.classname ?? "");
-    const file2 = str(tc.file) ?? str(suite.file);
+    const file2 = relativeTo(str(tc.file) ?? str(suite.file), roots);
     const failures = [...list(tc.failure), ...list(tc.error)];
     const status = failures.length > 0 ? "fail" : list(tc.skipped).length > 0 ? "skip" : "pass";
     const message = failures.length > 0 ? messageOf(failures[0]) : void 0;
     out.push({ id: testId(classname, name, file2), name, classname, file: file2, status, message });
   }
-  for (const child of list(suite.testsuite)) collect(child, out);
+  for (const child of list(suite.testsuite)) collect(child, out, roots);
 }
-function parseJUnit(xml) {
+function parseJUnit(xml, roots = []) {
   const valid = XMLValidator.validate(xml);
   if (valid !== true) throw new Error(`unreadable JUnit XML: ${valid.err.msg}`);
   const doc = parser.parse(xml);
@@ -101557,17 +101566,18 @@ function parseJUnit(xml) {
   }
   const root = doc.testsuites && typeof doc.testsuites === "object" ? doc.testsuites : {};
   const out = [];
-  collect(root, out);
-  for (const suite of list(doc.testsuite)) collect(suite, out);
+  collect(root, out, roots);
+  for (const suite of list(doc.testsuite)) collect(suite, out, roots);
   return out;
 }
 async function readJUnitFiles(cwd, pattern) {
   const paths = (await glob([pattern], { cwd, absolute: true, dot: true })).sort();
+  const roots = [cwd, await (0, import_promises4.realpath)(cwd).catch(() => cwd)];
   const tests = [];
   const errors = [];
   for (const path4 of paths) {
     try {
-      tests.push(...parseJUnit(await (0, import_promises4.readFile)(path4, "utf8")));
+      tests.push(...parseJUnit(await (0, import_promises4.readFile)(path4, "utf8"), roots));
     } catch (error63) {
       errors.push(`${path4}: ${error63.message}`);
     }
@@ -101671,7 +101681,7 @@ async function runInstall(cfg, label, log3) {
 // src/check/swap.ts
 var import_node_fs2 = require("node:fs");
 var import_promises5 = require("node:fs/promises");
-var import_node_path = require("node:path");
+var import_node_path2 = require("node:path");
 function planSwap(files) {
   const apply = [];
   const undo = [];
@@ -101710,7 +101720,7 @@ async function runOps(cwd, refs, ops) {
     );
   }
   for (const op of ops) {
-    if (op.kind === "remove") await (0, import_promises5.rm)((0, import_node_path.join)(cwd, op.path), { force: true });
+    if (op.kind === "remove") await (0, import_promises5.rm)((0, import_node_path2.join)(cwd, op.path), { force: true });
   }
 }
 async function trackedSnapshot(cwd) {
@@ -101720,7 +101730,7 @@ async function trackedSnapshot(cwd) {
 async function verifyRestored(cwd, plan, snapshot2) {
   if (await trackedSnapshot(cwd) !== snapshot2) return "tracked files differ from before the swap";
   for (const op of plan.undo) {
-    if (op.kind === "remove" && (0, import_node_fs2.existsSync)((0, import_node_path.join)(cwd, op.path))) {
+    if (op.kind === "remove" && (0, import_node_fs2.existsSync)((0, import_node_path2.join)(cwd, op.path))) {
       return `${op.path} should not exist after restore`;
     }
   }
@@ -121762,8 +121772,8 @@ async function run() {
     mentionsNotFound: mentions
   });
   await summary.addRaw(renderSummary(results, result.outputTails)).write();
-  const dir = await (0, import_promises6.mkdtemp)((0, import_node_path2.join)((0, import_node_os3.tmpdir)(), "redgreen-"));
-  const file2 = (0, import_node_path2.join)(dir, "results.json");
+  const dir = await (0, import_promises6.mkdtemp)((0, import_node_path3.join)((0, import_node_os3.tmpdir)(), "redgreen-"));
+  const file2 = (0, import_node_path3.join)(dir, "results.json");
   await (0, import_promises6.writeFile)(file2, JSON.stringify(results));
   await new DefaultArtifactClient().uploadArtifact(ARTIFACT_NAME, [file2], dir, { retentionDays: 7 });
   setOutput("verdict", results.verdict);

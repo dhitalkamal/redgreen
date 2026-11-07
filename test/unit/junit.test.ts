@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -67,6 +67,13 @@ describe('parseJUnit', () => {
     expect(tests[1]?.file).toBe('/w/tests/total.test.js');
   });
 
+  // node reports absolute files; load-error proof matches on repo-relative paths
+  it('makes case files relative to the run directory when given one', () => {
+    const tests = parseJUnit(NODE.replace('/w/tests/discount.test.js', '/elsewhere/d.test.js'), ['/w']);
+    expect(tests[1]?.file).toBe('tests/total.test.js');
+    expect(tests[0]?.file).toBe('/elsewhere/d.test.js');
+  });
+
   it('rejects malformed xml', () => {
     expect(() => parseJUnit('<testsuites><testsuite>')).toThrow(/unreadable JUnit XML/);
     expect(() => parseJUnit('<html></html>')).toThrow(/unreadable JUnit XML/);
@@ -86,6 +93,16 @@ describe('reading and clearing files', () => {
     expect(read.errors).toHaveLength(1);
     await clearJUnitFiles(dir, 'reports/*.xml');
     expect((await readJUnitFiles(dir, 'reports/*.xml')).files).toBe(0);
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  // on macos tmpdir is a symlink, and node writes the resolved path into file=
+  it('relativizes absolute case files against the real run directory', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'redgreen-junit-'));
+    const real = await realpath(dir);
+    await writeFile(join(dir, 'junit.xml'), NODE.replaceAll('/w/', `${real}/`));
+    const read = await readJUnitFiles(dir, 'junit.xml');
+    expect(read.tests.map((t) => t.file)).toEqual(['tests/discount.test.js', 'tests/total.test.js']);
     await rm(dir, { recursive: true, force: true });
   });
 });

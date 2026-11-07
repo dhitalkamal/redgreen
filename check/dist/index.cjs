@@ -101521,6 +101521,8 @@ var parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "",
   parseAttributeValue: false,
+  // decodes numeric references like &#10;, which node uses for newlines in messages
+  htmlEntities: true,
   isArray: (name) => ["testsuite", "testcase", "failure", "error", "skipped"].includes(name)
 });
 var list = (value) => value === void 0 || value === "" ? [] : Array.isArray(value) ? value : [value];

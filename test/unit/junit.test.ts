@@ -67,6 +67,12 @@ describe('parseJUnit', () => {
     expect(tests[1]?.file).toBe('/w/tests/total.test.js');
   });
 
+  // node escapes newlines in message attributes as numeric character references
+  it('decodes numeric character references in messages', () => {
+    const xml = '<testsuites><testcase name="t" classname="c"><failure message="a:&#10;&#10;190 !== 180 &#x41;"/></testcase></testsuites>';
+    expect(parseJUnit(xml)[0]?.message).toBe('a:\n\n190 !== 180 A');
+  });
+
   // node reports absolute files; load-error proof matches on repo-relative paths
   it('makes case files relative to the run directory when given one', () => {
     const tests = parseJUnit(NODE.replace('/w/tests/discount.test.js', '/elsewhere/d.test.js'), ['/w']);

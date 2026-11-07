@@ -26,7 +26,7 @@ describe('couldNotStart', () => {
 describe('runProblem', () => {
   it('reports each kind of run problem', () => {
     expect(runProblem({ depsWithoutInstall: true }, 20)).toMatch(/no install-command/);
-    expect(runProblem({ depsWithoutInstall: false, swapFailed: 'boom' }, 20)).toMatch(/could not swap files: boom/);
+    expect(runProblem({ depsWithoutInstall: false, swapFailed: 'boom' }, 20)).toMatch(/could not prepare the run without the change: boom/);
     expect(runProblem({ depsWithoutInstall: false, withoutRun: res({ timedOut: true }) }, 20)).toBe(
       'tests took longer than 20 minutes (without the change)',
     );

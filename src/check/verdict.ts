@@ -21,7 +21,8 @@ export function couldNotStart(r: RunResult): boolean {
 
 export function runProblem(facts: RunFacts, timeoutMinutes: number): string | undefined {
   if (facts.depsWithoutInstall) return 'dependencies changed and no install-command is configured';
-  if (facts.swapFailed) return `could not swap files: ${facts.swapFailed}`;
+  // covers the swap itself and the install that follows it
+  if (facts.swapFailed) return `could not prepare the run without the change: ${facts.swapFailed}`;
   const runs = [
     ['with', facts.withRun],
     ['without', facts.withoutRun],

@@ -67,6 +67,7 @@ describe('engine edge scenarios', () => {
     const result = await runEngine(miniConfig(repo, { installCommand: `${NODE} tools/install.cjs` }));
     expect(result.verdict).toBe('inconclusive');
     expect(result.reason).toMatch(/install command exited with code 1/);
+    expect(result.flags).not.toContain('coarse');
     expect(await repo.read('src/value.cjs')).toContain('2');
     expect(await repo.read('tools/install.cjs')).toContain('exit(0)');
   });

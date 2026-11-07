@@ -101788,7 +101788,7 @@ function couldNotStart(r) {
 }
 function runProblem(facts, timeoutMinutes) {
   if (facts.depsWithoutInstall) return "dependencies changed and no install-command is configured";
-  if (facts.swapFailed) return `could not swap files: ${facts.swapFailed}`;
+  if (facts.swapFailed) return `could not prepare the run without the change: ${facts.swapFailed}`;
   const runs = [
     ["with", facts.withRun],
     ["without", facts.withoutRun]
@@ -101891,10 +101891,14 @@ async function runEngine(cfg, log3 = () => {
     timings: { withSeconds: seconds(withSide), withoutSeconds: seconds(withoutSide) },
     outputTails: { ...tails, without: withoutSide?.run.outputTail }
   };
-  if (!withSide.tests || !withoutSide?.tests) {
-    if (cfg.junitPath && withoutSide) flags.push(withSide.tests ? "no-results-without-change" : "junit-missing");
+  if (!withoutSide) {
+    const reason = problem ?? "the tests did not run without the change";
+    return { ...start, verdict: "inconclusive", reason, flags, ...common };
+  }
+  if (!withSide.tests || !withoutSide.tests) {
+    if (cfg.junitPath) flags.push(withSide.tests ? "no-results-without-change" : "junit-missing");
     flags.push("coarse");
-    const decision = withoutSide ? decideFallback(problem, withoutSide.run, withSide.run) : { verdict: "inconclusive", reason: problem ?? "the tests did not run without the change" };
+    const decision = decideFallback(problem, withoutSide.run, withSide.run);
     return { ...start, ...decision, mode: "exit-code", flags, ...common };
   }
   const flaky = /* @__PURE__ */ new Set([...withSide.flaky, ...withoutSide.flaky]);

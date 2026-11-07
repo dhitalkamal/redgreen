@@ -73,7 +73,7 @@ These setups were checked against merged bug-fix pull requests in real projects.
 - Proof means the tests depend on the change. It does not mean the change is correct or wanted.
 - Stage 1 runs pull request code, so a determined attacker could forge its results. redgreen marks pull requests that change workflows or test configuration as unverified. Treat proof as evidence for review, never as permission to merge.
 - Tests inside source files, such as Rust inline tests, cannot count as proof yet.
-- Pull requests that change dependencies need `install-command`.
+- Pull requests that change dependencies need `install-command`. It also runs on the code without the change, so it has to work on the base branch; a pull request that adds the dependency manifest itself (for example a first `package.json`) comes back inconclusive.
 - Pull requests from forks get no secrets, so tests that need secrets are ignored.
 - Test time doubles for pull requests that change tests.
 

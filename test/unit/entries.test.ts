@@ -19,10 +19,10 @@ const cmp = comparison([
 ]);
 
 describe('toEntries', () => {
-  it('builds proof entries with first lines, kinds and suspect flags', () => {
+  it('builds proof entries with one-line messages, kinds and suspect flags', () => {
     const { proof } = toEntries(cmp, ['data/case.json', 'src/y.py']);
     expect(proof).toEqual([
-      { id: 'a::assert', file: undefined, message: 'AssertionError: 2 != 3', kind: 'assertion', suspect: false },
+      { id: 'a::assert', file: undefined, message: 'AssertionError: 2 != 3 at x', kind: 'assertion', suspect: false },
       { id: 'a::load', file: undefined, message: "ImportError: cannot import name 'y'", kind: 'missing-code', suspect: false },
       { id: 'a::data', file: undefined, message: "ENOENT: no such file, open 'data/case.json'", kind: 'assertion', suspect: true },
     ]);

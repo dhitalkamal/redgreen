@@ -100544,6 +100544,9 @@ function firstLine(message, max = 200) {
   const line = (message ?? "").split(/\r?\n/).map((l) => l.trim()).find((l) => l.length > 0);
   return (line ?? "").slice(0, max);
 }
+function oneLine(message, max = 200) {
+  return (message ?? "").split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0).join(" ").replace(/\s+/g, " ").slice(0, max);
+}
 function proofKind(message, viaLoadError) {
   if (viaLoadError) return "missing-code";
   const line = firstLine(message, 500);
@@ -100689,11 +100692,11 @@ function toEntries(cmp, touched) {
   const proof = cmp.items.filter((i) => i.outcome === "proof").map((i) => ({
     id: i.id,
     file: i.file,
-    message: firstLine(i.withoutMessage),
+    message: oneLine(i.withoutMessage),
     kind: proofKind(i.withoutMessage, i.viaLoadError),
     suspect: isSuspect(i.withoutMessage, touched)
   }));
-  const broken = cmp.items.filter((i) => i.outcome === "broken").map((i) => ({ id: i.id, file: i.file, message: firstLine(i.withMessage) }));
+  const broken = cmp.items.filter((i) => i.outcome === "broken").map((i) => ({ id: i.id, file: i.file, message: oneLine(i.withMessage) }));
   return { proof, broken };
 }
 function toCounts(cmp, flaky) {

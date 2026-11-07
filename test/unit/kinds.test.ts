@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { firstLine, isCodePath, isSuspect, proofKind } from '../../src/check/kinds';
+import { firstLine, isCodePath, isSuspect, oneLine, proofKind } from '../../src/check/kinds';
+
+describe('oneLine', () => {
+  // node and jest put the actual values on later lines
+  it('joins non-blank lines with single spaces', () => {
+    expect(oneLine('Expected values to be strictly equal:\n\n190 !== 180\n')).toBe('Expected values to be strictly equal: 190 !== 180');
+    expect(oneLine('  a\t\tb  \r\n   c ')).toBe('a b c');
+  });
+  it('cuts to the limit and handles missing messages', () => {
+    expect(oneLine('x\n'.repeat(300))).toHaveLength(200);
+    expect(oneLine(undefined)).toBe('');
+  });
+});
 
 describe('firstLine', () => {
   it('returns the first non-blank line, trimmed', () => {

@@ -1,6 +1,6 @@
 import type { Verdict } from '../shared/verdicts';
 import type { Comparison } from './compare';
-import { firstLine, isSuspect, proofKind, type ProofKind } from './kinds';
+import { isSuspect, oneLine, proofKind, type ProofKind } from './kinds';
 
 export interface ProofEntry { id: string; file?: string; message: string; kind: ProofKind; suspect: boolean }
 export interface BrokenEntry { id: string; file?: string; message: string }
@@ -34,13 +34,13 @@ export function toEntries(cmp: Comparison, touched: string[]): { proof: ProofEnt
     .map((i) => ({
       id: i.id,
       file: i.file,
-      message: firstLine(i.withoutMessage),
+      message: oneLine(i.withoutMessage),
       kind: proofKind(i.withoutMessage, i.viaLoadError),
       suspect: isSuspect(i.withoutMessage, touched),
     }));
   const broken = cmp.items
     .filter((i) => i.outcome === 'broken')
-    .map((i) => ({ id: i.id, file: i.file, message: firstLine(i.withMessage) }));
+    .map((i) => ({ id: i.id, file: i.file, message: oneLine(i.withMessage) }));
   return { proof, broken };
 }
 

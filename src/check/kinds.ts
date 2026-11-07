@@ -40,6 +40,17 @@ export function firstLine(message: string | undefined, max = 200): string {
   return (line ?? '').slice(0, max);
 }
 
+// display form for pr comments: values often sit on later lines (node, jest)
+export function oneLine(message: string | undefined, max = 200): string {
+  return (message ?? '')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .slice(0, max);
+}
+
 export function proofKind(message: string | undefined, viaLoadError: boolean): ProofKind {
   if (viaLoadError) return 'missing-code';
   const line = firstLine(message, 500);

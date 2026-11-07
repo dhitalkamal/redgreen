@@ -20,6 +20,15 @@ const SUREFIRE = `<testsuite name="com.example.ParserTest"><testcase name="parse
 const NESTED = `<testsuites><testsuite name="outer" file="src/a.test.ts"><testsuite name="inner">
 <testcase name="adds" classname=""/></testsuite><testcase name="subtracts" classname="" file="src/b.test.ts"/></testsuite></testsuites>`;
 
+const NODE = `<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+<testcase name="discount takes a percent off" time="0.001" classname="test" file="/w/tests/discount.test.js">
+<failure type="testCodeFailure" message="Expected values to be strictly equal">AssertionError</failure>
+</testcase>
+<testcase name="total adds items" time="0.001" classname="test" file="/w/tests/total.test.js"/>
+<!-- tests 2 -->
+</testsuites>`;
+
 describe('parseJUnit', () => {
   it('reads pytest output including errors and skips', () => {
     const tests = parseJUnit(PYTEST);
@@ -45,6 +54,17 @@ describe('parseJUnit', () => {
     const tests = parseJUnit(NESTED);
     expect(tests.map((t) => t.id).sort()).toEqual(['adds', 'src/b.test.ts::subtracts']);
     expect(tests.find((t) => t.name === 'subtracts')?.file).toBe('src/b.test.ts');
+  });
+
+  // node --test-reporter=junit puts cases straight under testsuites, with no testsuite
+  it('reads cases placed directly under the testsuites root', () => {
+    const tests = parseJUnit(NODE);
+    expect(tests.map((t) => [t.id, t.status])).toEqual([
+      ['test::discount takes a percent off', 'fail'],
+      ['test::total adds items', 'pass'],
+    ]);
+    expect(tests[0]?.message).toBe('Expected values to be strictly equal');
+    expect(tests[1]?.file).toBe('/w/tests/total.test.js');
   });
 
   it('rejects malformed xml', () => {

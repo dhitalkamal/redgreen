@@ -63,7 +63,9 @@ export function parseJUnit(xml: string): TestCase[] {
   }
   const root = doc.testsuites && typeof doc.testsuites === 'object' ? (doc.testsuites as Node) : {};
   const out: TestCase[] = [];
-  for (const suite of [...list(root.testsuite), ...list(doc.testsuite)]) collect(suite, out);
+  // collecting from the root also picks up cases placed directly under testsuites (node --test)
+  collect(root, out);
+  for (const suite of list(doc.testsuite)) collect(suite, out);
   return out;
 }
 

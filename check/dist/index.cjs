@@ -101557,7 +101557,8 @@ function parseJUnit(xml) {
   }
   const root = doc.testsuites && typeof doc.testsuites === "object" ? doc.testsuites : {};
   const out = [];
-  for (const suite of [...list(root.testsuite), ...list(doc.testsuite)]) collect(suite, out);
+  collect(root, out);
+  for (const suite of list(doc.testsuite)) collect(suite, out);
   return out;
 }
 async function readJUnitFiles(cwd, pattern) {

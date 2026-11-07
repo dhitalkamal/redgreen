@@ -77,6 +77,49 @@ describe('compareRuns', () => {
     expect(outcomeOf(compareRuns(without, withChange, opts).items, 'tests.test_other::test_a')).toBe('not-comparable');
   });
 
+  describe('go packages that do not compile without the change', () => {
+    const built = 'FAIL\texample.com/m [build failed]';
+    const goCase = (suite: string, name: string, status: TestStatus, message?: string): TestCase => ({
+      id: name === 'TestMain' ? 'TestMain' : `${suite}::${name}`,
+      name, classname: name === 'TestMain' ? '' : suite, suite, status, message,
+    });
+    const without = [
+      goCase('example.com/m', 'TestMain', 'fail', built),
+      goCase('example.com/m/doc', 'TestOld', 'pass'),
+    ];
+    const withChange = [
+      goCase('example.com/m', 'TestNew', 'pass'),
+      goCase('example.com/m', 'TestBad', 'fail'),
+      goCase('example.com/m/doc', 'TestOld', 'pass'),
+      goCase('example.com/m/doc', 'TestOnlyWith', 'pass'),
+    ];
+
+    it('turns the build failure of a package with a changed test file into missing-code proof', () => {
+      const { items } = compareRuns(without, withChange, { changedTestFiles: ['complete_test.go'] });
+      expect(items.find((i) => i.id === 'example.com/m::TestNew')).toMatchObject({
+        outcome: 'proof', viaLoadError: true, withoutMessage: built,
+      });
+      expect(outcomeOf(items, 'example.com/m::TestBad')).toBe('already-failing');
+      expect(outcomeOf(items, 'example.com/m/doc::TestOld')).toBe('independent');
+      // a sub-package is a different go package, so the parent build failure does not cover it
+      expect(outcomeOf(items, 'example.com/m/doc::TestOnlyWith')).toBe('not-comparable');
+    });
+
+    it('matches a changed test file in a sub-directory to its package', () => {
+      const docWithout = [goCase('example.com/m/doc', 'TestMain', 'fail', 'FAIL\texample.com/m/doc [build failed]'), goCase('example.com/m', 'TestA', 'pass')];
+      const docWith = [goCase('example.com/m/doc', 'TestNew', 'pass'), goCase('example.com/m', 'TestA', 'pass')];
+      const { items } = compareRuns(docWithout, docWith, { changedTestFiles: ['doc/man_test.go'] });
+      expect(outcomeOf(items, 'example.com/m/doc::TestNew')).toBe('proof');
+    });
+
+    it('ignores build failures in packages whose tests the pr did not change', () => {
+      for (const changed of ['doc/man_test.go', 'tests/test_x.py']) {
+        const { items } = compareRuns(without, withChange, { changedTestFiles: [changed] });
+        expect(outcomeOf(items, 'example.com/m::TestNew')).toBe('not-comparable');
+      }
+    });
+  });
+
   it('marks tests present only with the change as not comparable', () => {
     const { counts } = compareRuns([], [tc('src.lib::inline', 'pass')], opts);
     expect(counts['not-comparable']).toBe(1);

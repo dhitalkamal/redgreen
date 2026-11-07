@@ -101788,7 +101788,7 @@ function couldNotStart(r) {
 }
 function runProblem(facts, timeoutMinutes) {
   if (facts.depsWithoutInstall) return "dependencies changed and no install-command is configured";
-  if (facts.swapFailed) return `could not swap files: ${facts.swapFailed}`;
+  if (facts.swapFailed) return `could not prepare the run without the change: ${facts.swapFailed}`;
   const runs = [
     ["with", facts.withRun],
     ["without", facts.withoutRun]

@@ -50597,9 +50597,9 @@ var require_lib2 = __commonJS({
           return this.request("HEAD", requestUrl, null, additionalHeaders || {});
         });
       }
-      sendStream(verb, requestUrl, stream4, additionalHeaders) {
+      sendStream(verb2, requestUrl, stream4, additionalHeaders) {
         return __awaiter15(this, void 0, void 0, function* () {
-          return this.request(verb, requestUrl, stream4, additionalHeaders);
+          return this.request(verb2, requestUrl, stream4, additionalHeaders);
         });
       }
       /**
@@ -50645,14 +50645,14 @@ var require_lib2 = __commonJS({
        * All other methods such as get, post, patch, and request ultimately call this.
        * Prefer get, del, post and patch
        */
-      request(verb, requestUrl, data, headers) {
+      request(verb2, requestUrl, data, headers) {
         return __awaiter15(this, void 0, void 0, function* () {
           if (this._disposed) {
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info2 = this._prepareRequest(verb, parsedUrl, headers);
-          const maxTries = this._allowRetries && RetryableHttpVerbs2.includes(verb) ? this._maxRetries + 1 : 1;
+          let info2 = this._prepareRequest(verb2, parsedUrl, headers);
+          const maxTries = this._allowRetries && RetryableHttpVerbs2.includes(verb2) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
@@ -50689,7 +50689,7 @@ var require_lib2 = __commonJS({
                   }
                 }
               }
-              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              info2 = this._prepareRequest(verb2, parsedRedirectUrl, headers);
               response = yield this.requestRaw(info2, data);
               redirectsRemaining--;
             }
@@ -56357,9 +56357,9 @@ var HttpClient = class {
       return this.request("HEAD", requestUrl, null, additionalHeaders || {});
     });
   }
-  sendStream(verb, requestUrl, stream4, additionalHeaders) {
+  sendStream(verb2, requestUrl, stream4, additionalHeaders) {
     return __awaiter(this, void 0, void 0, function* () {
-      return this.request(verb, requestUrl, stream4, additionalHeaders);
+      return this.request(verb2, requestUrl, stream4, additionalHeaders);
     });
   }
   /**
@@ -56405,14 +56405,14 @@ var HttpClient = class {
    * All other methods such as get, post, patch, and request ultimately call this.
    * Prefer get, del, post and patch
    */
-  request(verb, requestUrl, data, headers) {
+  request(verb2, requestUrl, data, headers) {
     return __awaiter(this, void 0, void 0, function* () {
       if (this._disposed) {
         throw new Error("Client has already been disposed.");
       }
       const parsedUrl = new URL(requestUrl);
-      let info2 = this._prepareRequest(verb, parsedUrl, headers);
-      const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
+      let info2 = this._prepareRequest(verb2, parsedUrl, headers);
+      const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb2) ? this._maxRetries + 1 : 1;
       let numTries = 0;
       let response;
       do {
@@ -56449,7 +56449,7 @@ var HttpClient = class {
               }
             }
           }
-          info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+          info2 = this._prepareRequest(verb2, parsedRedirectUrl, headers);
           response = yield this.requestRaw(info2, data);
           redirectsRemaining--;
         }
@@ -108178,9 +108178,9 @@ var error21 = () => {
           return `\u05D2\u05D3\u05D5\u05DC \u05DE\u05D3\u05D9: ${subject} \u05E6\u05E8\u05D9\u05DA \u05DC\u05D4\u05D9\u05D5\u05EA ${comparison}`;
         }
         if (issue3.origin === "array" || issue3.origin === "set") {
-          const verb = issue3.origin === "set" ? "\u05E6\u05E8\u05D9\u05DB\u05D4" : "\u05E6\u05E8\u05D9\u05DA";
+          const verb2 = issue3.origin === "set" ? "\u05E6\u05E8\u05D9\u05DB\u05D4" : "\u05E6\u05E8\u05D9\u05DA";
           const comparison = issue3.inclusive ? `${issue3.maximum} ${sizing?.unit ?? ""} \u05D0\u05D5 \u05E4\u05D7\u05D5\u05EA` : `\u05E4\u05D7\u05D5\u05EA \u05DE-${issue3.maximum} ${sizing?.unit ?? ""}`;
-          return `\u05D2\u05D3\u05D5\u05DC \u05DE\u05D3\u05D9: ${subject} ${verb} \u05DC\u05D4\u05DB\u05D9\u05DC ${comparison}`.trim();
+          return `\u05D2\u05D3\u05D5\u05DC \u05DE\u05D3\u05D9: ${subject} ${verb2} \u05DC\u05D4\u05DB\u05D9\u05DC ${comparison}`.trim();
         }
         const adj = issue3.inclusive ? "<=" : "<";
         const be = verbFor(issue3.origin ?? "value");
@@ -108200,13 +108200,13 @@ var error21 = () => {
           return `\u05E7\u05D8\u05DF \u05DE\u05D3\u05D9: ${subject} \u05E6\u05E8\u05D9\u05DA \u05DC\u05D4\u05D9\u05D5\u05EA ${comparison}`;
         }
         if (issue3.origin === "array" || issue3.origin === "set") {
-          const verb = issue3.origin === "set" ? "\u05E6\u05E8\u05D9\u05DB\u05D4" : "\u05E6\u05E8\u05D9\u05DA";
+          const verb2 = issue3.origin === "set" ? "\u05E6\u05E8\u05D9\u05DB\u05D4" : "\u05E6\u05E8\u05D9\u05DA";
           if (issue3.minimum === 1 && issue3.inclusive) {
             const singularPhrase = issue3.origin === "set" ? "\u05DC\u05E4\u05D7\u05D5\u05EA \u05E4\u05E8\u05D9\u05D8 \u05D0\u05D7\u05D3" : "\u05DC\u05E4\u05D7\u05D5\u05EA \u05E4\u05E8\u05D9\u05D8 \u05D0\u05D7\u05D3";
-            return `\u05E7\u05D8\u05DF \u05DE\u05D3\u05D9: ${subject} ${verb} \u05DC\u05D4\u05DB\u05D9\u05DC ${singularPhrase}`;
+            return `\u05E7\u05D8\u05DF \u05DE\u05D3\u05D9: ${subject} ${verb2} \u05DC\u05D4\u05DB\u05D9\u05DC ${singularPhrase}`;
           }
           const comparison = issue3.inclusive ? `${issue3.minimum} ${sizing?.unit ?? ""} \u05D0\u05D5 \u05D9\u05D5\u05EA\u05E8` : `\u05D9\u05D5\u05EA\u05E8 \u05DE-${issue3.minimum} ${sizing?.unit ?? ""}`;
-          return `\u05E7\u05D8\u05DF \u05DE\u05D3\u05D9: ${subject} ${verb} \u05DC\u05D4\u05DB\u05D9\u05DC ${comparison}`.trim();
+          return `\u05E7\u05D8\u05DF \u05DE\u05D3\u05D9: ${subject} ${verb2} \u05DC\u05D4\u05DB\u05D9\u05DC ${comparison}`.trim();
         }
         const adj = issue3.inclusive ? ">=" : ">";
         const be = verbFor(issue3.origin ?? "value");
@@ -120236,32 +120236,63 @@ var HEADLINES = {
   unverified: "Unverified"
 };
 var tests = (n) => n === 1 ? "1 test" : `${n} tests`;
-function explain(r, shown) {
+var verb = (n, one, many) => n === 1 ? one : many;
+function explainCoarse(shown) {
   switch (shown) {
     case "proof-found":
-      return `${tests(r.proof.length)} ${r.proof.length === 1 ? "fails" : "fail"} without this change and ${r.proof.length === 1 ? "passes" : "pass"} with it.`;
+      return "The test command fails without this change and passes with it.";
+    case "breaks-tests":
+      return "The test command passes without this change and fails with it.";
     case "no-proof":
-      return "The tests in this PR pass even without its code changes. Could you add a test that fails on the current code?";
+      return "The test command passes both with and without this change. Could you add a test that fails on the current code?";
+    default:
+      return void 0;
+  }
+}
+function explain(r, shown) {
+  const coarse = r.mode === "exit-code" ? explainCoarse(shown) : void 0;
+  if (coarse) return coarse;
+  switch (shown) {
+    case "proof-found":
+      return `${tests(r.counts.proof)} ${verb(r.counts.proof, "fails", "fail")} without this change and ${verb(r.counts.proof, "passes", "pass")} with it.`;
+    case "no-proof": {
+      const both = r.counts.alreadyFailing;
+      const failBoth = both > 0 ? ` ${tests(both)} ${verb(both, "fails", "fail")} both with and without it.` : "";
+      return `No test fails without this change and passes with it.${failBoth} Could you add a test that fails on the current code?`;
+    }
     case "no-proof-yet":
       return "This PR doesn't add or change tests. If it fixes a bug, a test that fails without the fix helps maintainers review it faster.";
     case "breaks-tests":
-      return `${tests(r.broken.length)} that passed before ${r.broken.length === 1 ? "fails" : "fail"} with this change.`;
+      return `${tests(r.broken.length)} that passed before ${verb(r.broken.length, "fails", "fail")} with this change.`;
     case "inconclusive":
       return "redgreen could not get a clean comparison.";
     case "unverified":
       return "This result cannot be trusted.";
   }
 }
+function groupProof(proof) {
+  const groups = /* @__PURE__ */ new Map();
+  for (const p of proof) {
+    const key = `${p.kind}\0${p.suspect}\0${p.message}`;
+    groups.set(key, [...groups.get(key) ?? [], p]);
+  }
+  return [...groups.values()];
+}
+function proofLine(group) {
+  const first = group[0];
+  const ids = group.slice(0, 3).map((p) => inlineCode(p.id)).join(", ");
+  const more = group.length > 3 ? ` and ${group.length - 3} more` : "";
+  return `- ${ids}${more}: without the change, ${inlineCode(first.message)}` + (first.suspect ? " (may be a misplaced support file, not a missing fix)" : "");
+}
 function proofLines(r) {
-  const shownProof = r.proof.slice(0, MAX_PROOF);
-  const line = (p) => `- ${inlineCode(p.id)}: without the change, ${inlineCode(p.message)}` + (p.suspect ? " (may be a misplaced support file, not a missing fix)" : "");
+  const shown = groupProof(r.proof).slice(0, MAX_PROOF);
   const out = [];
-  const assertion = shownProof.filter((p) => p.kind === "assertion");
-  const missing = shownProof.filter((p) => p.kind === "missing-code");
-  if (assertion.length > 0) out.push("Fails on an assertion without the change:", ...assertion.map(line), "");
-  if (missing.length > 0) out.push("Fails because new code is missing without the change:", ...missing.map(line), "");
-  const rest = r.counts.proof - shownProof.length;
-  if (rest > 0) out.push(`and ${rest} more`, "");
+  const assertion = shown.filter((g) => g[0]?.kind === "assertion");
+  const missing = shown.filter((g) => g[0]?.kind === "missing-code");
+  if (assertion.length > 0) out.push("Fails on an assertion without the change:", ...assertion.map(proofLine), "");
+  if (missing.length > 0) out.push("Fails because new code is missing without the change:", ...missing.map(proofLine), "");
+  const rest = r.counts.proof - shown.reduce((n, g) => n + g.length, 0);
+  if (rest > 0) out.push(`and ${rest} more not listed`, "");
   return out;
 }
 function renderComment(r, shown, opts) {
@@ -120278,7 +120309,10 @@ function renderComment(r, shown, opts) {
   if (r.mentionsNotFound.length > 0) {
     lines.push(`Not found in this repository: ${r.mentionsNotFound.map((m) => inlineCode(m)).join(", ")}`, "");
   }
-  if (r.flags.includes("coarse")) lines.push("Only the whole test command could be compared, not individual tests.", "");
+  if (r.flags.includes("coarse")) {
+    const none = r.flags.includes("no-results-without-change") ? " Without the change the tests produced no results, for example because they did not compile." : "";
+    lines.push(`Only the whole test command could be compared, not individual tests.${none}`, "");
+  }
   lines.push(`[How to prove your change](${opts.guideUrl}) | [Run details](${opts.runUrl})`);
   return lines.join("\n");
 }
@@ -120331,7 +120365,10 @@ var DEFAULT_TRUST_PATTERNS = [
   "noxfile.py",
   "setup.cfg",
   "Makefile",
-  "justfile"
+  "GNUmakefile",
+  "makefile",
+  "justfile",
+  "conftest.py"
 ];
 function untrustedFiles(changed, patterns) {
   const isMatch = makeMatcher(patterns);

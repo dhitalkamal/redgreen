@@ -54,7 +54,7 @@ describe('renderComment', () => {
     const proof = [
       { id: 'miss', message: 'ImportError: x', kind: 'missing-code' as const, suspect: false },
       { id: 'sus', message: 'ENOENT data.json', kind: 'assertion' as const, suspect: true },
-      ...Array.from({ length: 24 }, (_, i) => ({ id: `t${i}`, message: 'm', kind: 'assertion' as const, suspect: false })),
+      ...Array.from({ length: 24 }, (_, i) => ({ id: `t${i}`, message: `m${i}`, kind: 'assertion' as const, suspect: false })),
     ];
     const md = renderComment(results({ proof, counts: { ...results().counts, proof: 26 } }), 'proof-found', opts);
     expect(md).toContain('Fails on an assertion without the change:');
@@ -65,7 +65,7 @@ describe('renderComment', () => {
 
   it('explains every other verdict', () => {
     expect(renderComment(results({ verdict: 'no-proof', proof: [] }), 'no-proof', opts)).toContain(
-      'The tests in this PR pass even without its code changes. Could you add a test that fails on the current code?',
+      '**redgreen: No proof.** No test fails without this change and passes with it. Could you add a test that fails on the current code?',
     );
     expect(renderComment(results({ verdict: 'no-proof-yet', proof: [] }), 'no-proof-yet', opts)).toContain("doesn't add or change tests");
     const broken = results({ verdict: 'breaks-tests', broken: [{ id: 'old::t', message: 'expected 1' }] });
@@ -85,5 +85,49 @@ describe('renderComment', () => {
     const md = renderComment(results({ mentionsNotFound: ['parse_emoji'], flags: ['coarse'] }), 'proof-found', opts);
     expect(md).toContain(`Not found in this repository: ${inlineCode('parse_emoji')}`);
     expect(md).toContain('Only the whole test command could be compared, not individual tests.');
+  });
+
+  // a new test that fails in both runs is not "passing without the change"
+  it('mentions tests that fail both with and without the change when there is no proof', () => {
+    const r = results({ verdict: 'no-proof', proof: [], counts: { ...results().counts, proof: 0, alreadyFailing: 1 } });
+    expect(renderComment(r, 'no-proof', opts)).toContain(
+      'No test fails without this change and passes with it. 1 test fails both with and without it. Could you add',
+    );
+  });
+
+  describe('when only the whole test command was compared', () => {
+    const coarse = (verdict: Results['verdict'], flags: Results['flags'] = ['coarse']) =>
+      results({ verdict, mode: 'exit-code', proof: [], flags, counts: { ...results().counts, proof: 0, independent: 0 } });
+
+    it('talks about the command instead of counting tests', () => {
+      const proof = renderComment(coarse('proof-found'), 'proof-found', opts);
+      expect(proof).toContain('**redgreen: Proof found.** The test command fails without this change and passes with it.');
+      expect(proof).not.toContain('0 tests');
+      expect(renderComment(coarse('breaks-tests'), 'breaks-tests', opts)).toContain(
+        '**redgreen: Breaks tests.** The test command passes without this change and fails with it.',
+      );
+      expect(renderComment(coarse('no-proof'), 'no-proof', opts)).toContain(
+        '**redgreen: No proof.** The test command passes both with and without this change. Could you add',
+      );
+    });
+
+    it('says when the tests produced no results without the change', () => {
+      const md = renderComment(coarse('proof-found', ['no-results-without-change', 'coarse']), 'proof-found', opts);
+      expect(md).toContain(
+        'Only the whole test command could be compared, not individual tests. Without the change the tests produced no results, for example because they did not compile.',
+      );
+    });
+  });
+
+  // a load error fails every test in the file or package with the same message
+  it('groups proof tests that share a failure message', () => {
+    const same = (id: string) => ({ id, message: 'FAIL m [build failed]', kind: 'missing-code' as const, suspect: false });
+    const proof = [same('m::A'), same('m::B'), same('m::C'), same('m::D'), same('m::E')];
+    const md = renderComment(results({ proof, counts: { ...results().counts, proof: 9 } }), 'proof-found', opts);
+    expect(md).toContain(
+      `- ${inlineCode('m::A')}, ${inlineCode('m::B')}, ${inlineCode('m::C')} and 2 more: without the change, ${inlineCode('FAIL m [build failed]')}`,
+    );
+    expect(md).toContain('and 4 more not listed');
+    expect(md.match(/build failed/g)).toHaveLength(1);
   });
 });

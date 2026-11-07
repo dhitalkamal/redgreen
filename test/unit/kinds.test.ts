@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { firstLine, isCodePath, isSuspect, proofKind } from '../../src/check/kinds';
+import { firstLine, isCodePath, isSuspect, oneLine, proofKind } from '../../src/check/kinds';
+
+describe('oneLine', () => {
+  // node and jest put the actual values on later lines
+  it('joins non-blank lines with single spaces', () => {
+    expect(oneLine('Expected values to be strictly equal:\n\n190 !== 180\n')).toBe('Expected values to be strictly equal: 190 !== 180');
+    expect(oneLine('  a\t\tb  \r\n   c ')).toBe('a b c');
+  });
+  it('cuts to the limit and handles missing messages', () => {
+    expect(oneLine('x\n'.repeat(300)).length).toBeLessThanOrEqual(200);
+    // a visible marker so a cut message is not mistaken for the whole one
+    expect(oneLine('x\n'.repeat(300)).endsWith('x ...')).toBe(true);
+    expect(oneLine('a'.repeat(200))).toBe('a'.repeat(200));
+    expect(oneLine(undefined)).toBe('');
+  });
+});
 
 describe('firstLine', () => {
   it('returns the first non-blank line, trimmed', () => {
@@ -35,6 +50,7 @@ describe('proofKind', () => {
     "Parser does not contain a definition for 'ParseNew'",
     'Call to undefined function parse_new()',
     '** (UndefinedFunctionError) function Parser.parse_new/1 is undefined',
+    "TypeError: echo() got an unexpected keyword argument 'err'",
   ])('treats %s as missing code', (message) => {
     expect(proofKind(message, false)).toBe('missing-code');
   });

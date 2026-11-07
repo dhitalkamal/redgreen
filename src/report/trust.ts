@@ -3,7 +3,7 @@ import { makeMatcher } from '../check/patterns';
 export const DEFAULT_TRUST_PATTERNS = [
   '.github/workflows/**', '.github/actions/**', 'jest.config.*', 'vitest.config.*', 'vitest.workspace.*',
   'vite.config.*', 'karma.conf.*', 'playwright.config.*', 'cypress.config.*', 'pytest.ini', 'tox.ini',
-  'noxfile.py', 'setup.cfg', 'Makefile', 'justfile',
+  'noxfile.py', 'setup.cfg', 'Makefile', 'GNUmakefile', 'makefile', 'justfile', 'conftest.py',
 ];
 
 export function untrustedFiles(changed: string[], patterns: string[]): string[] {

@@ -5,7 +5,8 @@ describe('looksLikeCode', () => {
   it.each(['src/a.rs', 'parse_unicode()', 'parser.parse', 'parseUnicode', 'run()'])('accepts %s', (t) => {
     expect(looksLikeCode(t)).toBe(true);
   });
-  it.each(['word', 'Parser', 'two words', 'README'])('rejects %s', (t) => {
+  // go and handlebars templates: {{.Name}} is template syntax, not a code name
+  it.each(['word', 'Parser', 'two words', 'README', '{{.Name}}', '{{.CommandPath}}'])('rejects %s', (t) => {
     expect(looksLikeCode(t)).toBe(false);
   });
 });

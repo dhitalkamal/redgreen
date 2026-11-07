@@ -1,0 +1,21 @@
+name: redgreen
+on: pull_request
+permissions:
+  contents: read
+concurrency:
+  group: redgreen-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      # the project's own setup steps, same as its CI
+      - run: npm ci
+      - uses: OWNER/redgreen/check@v1
+        with:
+          test-command: npx vitest run --reporter=junit --outputFile=reports/junit.xml
+          junit-path: reports/*.xml
+          install-command: npm ci

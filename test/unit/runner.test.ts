@@ -46,10 +46,12 @@ describe('runCommand', () => {
 
   it.skipIf(process.platform === 'win32')('kills processes the tests leave behind', async () => {
     const script = join(dir, 'bg.cjs');
+    // unref so bg.cjs exits at once and the grandchild is really left behind;
+    // without it node waits for the child and late.txt is written before exit
     await writeFile(
       script,
       "require('node:child_process').spawn(process.execPath, ['-e', " +
-        "\"setTimeout(() => require('node:fs').writeFileSync('late.txt', 'x'), 1500)\"], { stdio: 'inherit' });\n",
+        "\"setTimeout(() => require('node:fs').writeFileSync('late.txt', 'x'), 1500)\"], { stdio: 'inherit' }).unref();\n",
     );
     const r = await runCommand(`${node} bg.cjs`, opts());
     expect(r.exitCode).toBe(0);

@@ -1,0 +1,43 @@
+name: redgreen report
+description: Validates redgreen results from a pull request run and posts one comment, one check and one label.
+author: redgreen
+branding:
+  icon: message-square
+  color: green
+inputs:
+  github-token:
+    description: Token for reading the artifact and writing the comment, check and label
+    default: ${{ github.token }}
+  check-workflow:
+    description: Path of the stage 1 workflow that must have produced the results
+    default: .github/workflows/redgreen.yml
+  mode:
+    description: advisory or blocking
+    default: advisory
+  block-on:
+    description: Results that fail the check in blocking mode (any verdict or unverified)
+    default: no-proof,breaks-tests
+  labels:
+    description: Apply proof labels
+    default: 'true'
+  label-prefix:
+    description: Label prefix
+    default: 'proof: '
+  comment:
+    description: Post the pull request comment
+    default: 'true'
+  skip-authors:
+    description: Authors to skip
+    default: dependabot[bot],renovate[bot],github-actions[bot]
+  skip-drafts:
+    description: Skip draft pull requests
+    default: 'false'
+  trust-patterns:
+    description: Replaces the built-in list of paths that make results unverified when changed
+    default: ''
+  guide-url:
+    description: Link for the "how to prove your change" guide
+    default: ''
+runs:
+  using: node24
+  main: dist/index.cjs

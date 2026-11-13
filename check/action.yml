@@ -1,0 +1,43 @@
+name: redgreen check
+description: Runs a pull request's tests with and without its change and records whether the tests prove it.
+author: redgreen
+branding:
+  icon: check-circle
+  color: green
+inputs:
+  test-command:
+    description: Command that runs the tests
+    required: true
+  junit-path:
+    description: Glob for JUnit XML files; enables per-test results
+    default: ''
+  install-command:
+    description: Reinstalls dependencies when a pull request changes them
+    default: ''
+  test-patterns:
+    description: Replaces the built-in test file patterns (comma or newline separated)
+    default: ''
+  extra-test-patterns:
+    description: Adds to the test file patterns
+    default: ''
+  dependency-patterns:
+    description: Replaces the built-in dependency file patterns
+    default: ''
+  run-timeout-minutes:
+    description: Time limit for each test run
+    default: '20'
+  retries:
+    description: Extra repeats of each run to detect flaky tests
+    default: '0'
+  run-without-test-changes:
+    description: Run even when no test files changed
+    default: 'false'
+  max-changed-files:
+    description: Above this many changed files the result is inconclusive
+    default: '3000'
+outputs:
+  verdict:
+    description: One of inconclusive, breaks-tests, proof-found, no-proof, no-proof-yet
+runs:
+  using: node24
+  main: dist/index.cjs

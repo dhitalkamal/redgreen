@@ -2,9 +2,11 @@
 
 Red without the change, green with it.
 
-redgreen is a GitHub Action for maintainers. It checks whether a pull request's tests prove its change: the tests the pull request adds or changes should fail on the code before the change and pass with it. It posts one comment, one check, and one label per pull request.
+Coding agents now open a lot of pull requests, and most of them come with tests. Green tests show the code runs. They do not show that the tests check the change: a test written next to a fix, by an agent or a person, often passes on the old code too.
 
-It runs in your repository's own GitHub Actions minutes. There is no service, no account, and no AI.
+redgreen is a GitHub Action for maintainers that checks this on every pull request. The tests the pull request adds or changes should fail on the code before the change and pass with it. It posts one comment, one check, and one label per pull request.
+
+It runs in your repository's own GitHub Actions minutes. There is no service, no account, and no AI: the verdict comes from running your tests, not from a model.
 
 ## How it works
 
@@ -13,7 +15,7 @@ It runs in your repository's own GitHub Actions minutes. There is no service, no
 
 ## Quick start
 
-Add `docs/templates/redgreen.yml` and `docs/templates/redgreen-report.yml` to `.github/workflows/`. In the first file, replace the setup steps and `test-command` with your project's own. Replace `OWNER` with the publisher's account.
+Add `docs/templates/redgreen.yml` and `docs/templates/redgreen-report.yml` to `.github/workflows/`. In the first file, replace the setup steps and `test-command` with your project's own. Stage 1 uses `dhitalkamal/redgreen@v1` and stage 2 uses `dhitalkamal/redgreen/report@v1`.
 
 ## Verdicts
 

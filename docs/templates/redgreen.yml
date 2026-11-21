@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 2
       # the project's own setup steps, same as its CI
       - run: npm ci
-      - uses: OWNER/redgreen/check@v1
+      - uses: dhitalkamal/redgreen@v1
         with:
           test-command: npx vitest run --reporter=junit --outputFile=reports/junit.xml
           junit-path: reports/*.xml

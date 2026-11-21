@@ -11,4 +11,4 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps:
-      - uses: OWNER/redgreen/report@v1
+      - uses: dhitalkamal/redgreen/report@v1

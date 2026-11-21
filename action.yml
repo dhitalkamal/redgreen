@@ -1,4 +1,4 @@
-name: redgreen check
+name: redgreen proof check
 description: Runs a pull request's tests with and without its change and records whether the tests prove it.
 author: redgreen
 branding:
@@ -40,4 +40,4 @@ outputs:
     description: One of inconclusive, breaks-tests, proof-found, no-proof, no-proof-yet
 runs:
   using: node24
-  main: dist/index.cjs
+  main: check/dist/index.cjs

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 // input names are the two-space-indented keys under inputs:
@@ -12,10 +12,21 @@ function inputNames(path: string): string[] {
 describe('docs stay in sync with the action metadata', () => {
   const readme = readFileSync('README.md', 'utf8');
 
-  it.each(['check/action.yml', 'report/action.yml'])('README documents every input of %s', (path) => {
+  it.each(['action.yml', 'report/action.yml'])('README documents every input of %s', (path) => {
     const names = inputNames(path);
     expect(names.length).toBeGreaterThan(5);
     for (const name of names) expect(readme).toContain(`\`${name}\``);
+  });
+
+  it('root action runs the check bundle', () => {
+    const root = readFileSync('action.yml', 'utf8');
+    expect(root).toContain('main: check/dist/index.cjs');
+    expect(existsSync('check/action.yml')).toBe(false);
+  });
+
+  it('templates point at the published action, not a placeholder', () => {
+    expect(readFileSync('docs/templates/redgreen.yml', 'utf8')).toContain('uses: dhitalkamal/redgreen@v1');
+    expect(readFileSync('docs/templates/redgreen-report.yml', 'utf8')).toContain('uses: dhitalkamal/redgreen/report@v1');
   });
 
   it('templates use the expected names and never check out code in stage 2', () => {

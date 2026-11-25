@@ -8,6 +8,10 @@ redgreen is a GitHub Action for maintainers that checks this on every pull reque
 
 It runs in your repository's own GitHub Actions minutes. There is no service, no account, and no AI: the verdict comes from running your tests, not from a model.
 
+![redgreen's comment on a pull request: Proof found, 1 test fails without this change and passes with it](docs/images/proof-found.png)
+
+A real result on [dhitalkamal/parley#18](https://github.com/dhitalkamal/parley/pull/18): the new test fails on the old code because a `{{var}}` placeholder came back percent-encoded, and passes with the fix.
+
 ## How it works
 
 - Stage 1, `check`, runs in a read-only `pull_request` job after your usual setup steps. It runs your tests with the change, puts the non-test files back to the base branch, runs the tests again, restores everything, and compares the two runs test by test using JUnit XML.
